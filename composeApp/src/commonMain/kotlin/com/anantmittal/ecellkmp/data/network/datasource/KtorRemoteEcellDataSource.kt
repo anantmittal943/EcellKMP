@@ -1,4 +1,4 @@
-package com.anantmittal.ecellkmp.data.network
+package com.anantmittal.ecellkmp.data.network.datasource
 
 class KtorRemoteEcellDataSource : RemoteEcellDataSource {
 }
