@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "887068944759",
+    "project_id": "e-cell-main-app-68d8c",
+    "storage_bucket": "e-cell-main-app-68d8c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:887068944759:android:4e2cd66ca8cab13e4b9972",
+        "android_client_info": {
+          "package_name": "com.anantmittal.ecellkmp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "887068944759-dho31913mca0a5hb9p8b4elqlnh32c2l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anantmittal.ecellkmp",
+            "certificate_hash": "7e5a5d60d125003ee73bebed16eb3a4426c9c60c"
+          }
+        },
+        {
+          "client_id": "887068944759-mbghmh22snekk4ifa8pil4n0bik4u2ag.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDtzKCV0PX_DUjoN8LfxoRlTXxi7hehrs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "887068944759-6aal06sc87i8pkjhc9c85ttk9cvl0gfk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "887068944759-6k41kpbfjqgdtug1bihrc086cic49ut7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.anantmittal.ecellkmp.EcellKMP"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:887068944759:android:1bd8a9cdaf7faac14b9972",
+        "android_client_info": {
+          "package_name": "com.devshiv.ecellapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "887068944759-3496e7vspsvbq6gdlt39ptu40bnf2ld9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devshiv.ecellapp",
+            "certificate_hash": "79795d4484be7f3f93b3f9b1fdc7b0ecc8faaae9"
+          }
+        },
+        {
+          "client_id": "887068944759-mbghmh22snekk4ifa8pil4n0bik4u2ag.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDtzKCV0PX_DUjoN8LfxoRlTXxi7hehrs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "887068944759-6aal06sc87i8pkjhc9c85ttk9cvl0gfk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "887068944759-6k41kpbfjqgdtug1bihrc086cic49ut7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.anantmittal.ecellkmp.EcellKMP"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

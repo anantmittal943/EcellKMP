@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">E-Cell</string>
+    <string name="title_activity_home">HomeActivity</string>
+
+    <string name="title_home">E-Cell</string>
+    <string name="title_meetings">Meetings</string>
+    <string name="title_profile">Profile</string>
+    <string name="demo_txt">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur</string>
+</resources>
