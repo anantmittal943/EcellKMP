@@ -8,7 +8,7 @@ data class SignupState(
     val kietLibId: String = "",
     val password: String = "",
     val cnfmPassword: String = "",
-    val isVisible: Boolean = true,
+    val isVisible: Boolean = false,
     val isLoading: Boolean = false,
     val errorMessage: UiText? = null
 )

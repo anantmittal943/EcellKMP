@@ -1,11 +1,16 @@
 package com.anantmittal.ecellkmp.presentation.login_screen
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.anantmittal.ecellkmp.domain.repository.EcellRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(
+    private val ecellRepository: EcellRepository
+) : ViewModel() {
     private val _state = MutableStateFlow(LoginState())
     val state = _state.asStateFlow()
 
@@ -29,7 +34,12 @@ class LoginViewModel : ViewModel() {
                 }
             }
 
-            is LoginAction.OnLoginClick -> TODO()
+            is LoginAction.OnLoginClick -> {
+                viewModelScope.launch {
+                    ecellRepository.login(action.loginModel)
+                }
+            }
+
             is LoginAction.OnSignupClick -> {}
         }
     }

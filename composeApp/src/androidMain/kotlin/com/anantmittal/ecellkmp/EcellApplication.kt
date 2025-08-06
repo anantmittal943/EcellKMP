@@ -5,11 +5,11 @@ import com.anantmittal.ecellkmp.di.initKoin
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.FirebaseOptions
 import dev.gitlive.firebase.initialize
+import org.koin.android.ext.koin.androidContext
 
 class EcellApplication: Application() {
     override fun onCreate() {
         super.onCreate()
-        initKoin { this@EcellApplication }
         Firebase.initialize(
             applicationContext,
             options = FirebaseOptions(
@@ -18,5 +18,6 @@ class EcellApplication: Application() {
                 projectId = "e-cell-main-app-68d8c"
             )
         )
+        initKoin { androidContext(this@EcellApplication) }
     }
 }

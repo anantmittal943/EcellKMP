@@ -5,7 +5,13 @@ import kotlinx.serialization.Serializable
 sealed interface Route {
 
     @Serializable
-    data object NavGraph : Route
+    data object AuthNavGraph : Route
+
+    @Serializable
+    data object NormalNavGraph : Route
+
+    @Serializable
+    data object TeamNavGraph : Route
 
     @Serializable
     data object Splash : Route

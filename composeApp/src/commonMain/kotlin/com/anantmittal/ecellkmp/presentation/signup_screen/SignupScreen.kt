@@ -61,16 +61,16 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun SignupScreenRoot(
     viewModel: SignupViewModel = koinViewModel(),
-    onSignupClick: (signupModel: SignupModel) -> Unit,
+//    onSignupClick: (signupModel: SignupModel) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     SignupScreen(
         state = state,
         onAction = { action ->
-            when (action) {
+            /*when (action) {
                 is SignupAction.OnSignupClick -> onSignupClick(action.signupModel)
                 else -> Unit
-            }
+            }*/
             viewModel.onAction(action)
         }
     )
@@ -206,7 +206,7 @@ private fun SignupScreen(
                 label = { Text("Confirm Password") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Next
+                    imeAction = ImeAction.Done
                 ),
                 leadingIcon = { Icon(painter = painterResource(Res.drawable.sm_confmPassword), contentDescription = null, Modifier.size(18.dp)) },
                 visualTransformation = if (state.isVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -223,7 +223,18 @@ private fun SignupScreen(
             )
 
             Button(
-                onClick = {},
+                onClick = {
+                    onAction(
+                        SignupAction.OnSignupClick(
+                            SignupModel(
+                                name = state.name,
+                                email = state.email,
+                                kietLibId = state.kietLibId,
+                                cnfmPassword = state.cnfmPassword
+                            )
+                        )
+                    )
+                },
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = ColorAccent),
                 elevation = ButtonDefaults.buttonElevation(4.dp),

@@ -4,7 +4,7 @@ import androidx.sqlite.SQLiteException
 import com.anantmittal.ecellkmp.data.database.EcellAccountsDao
 import com.anantmittal.ecellkmp.data.mappers.toAccountEntity
 import com.anantmittal.ecellkmp.data.mappers.toAccountModel
-import com.anantmittal.ecellkmp.data.network.authentication.EcellAuthSource
+import com.anantmittal.ecellkmp.data.network.authenticationsource.EcellAuthSource
 import com.anantmittal.ecellkmp.domain.models.AccountModel
 import com.anantmittal.ecellkmp.domain.models.LoginModel
 import com.anantmittal.ecellkmp.domain.models.SignupModel
@@ -13,6 +13,7 @@ import com.anantmittal.ecellkmp.domain.repository.EcellRepository
 import com.anantmittal.ecellkmp.utility.domain.DataError
 import com.anantmittal.ecellkmp.utility.domain.EmptyResult
 import com.anantmittal.ecellkmp.utility.domain.Result
+import com.anantmittal.ecellkmp.utility.domain.onSuccess
 import kotlinx.coroutines.flow.Flow
 
 class DefaultEcellRepository(
@@ -27,7 +28,17 @@ class DefaultEcellRepository(
     }
 
     override suspend fun signup(signupModel: SignupModel): EmptyResult<DataError.Remote> {
-        return ecellAuthSource.signup(signupModel)
+        return ecellAuthSource.signup(signupModel).onSuccess {
+            loggedIn(
+                AccountModel(
+                    id = currentUser.collect { it?.uid }.toString(),
+                    name = signupModel.name,
+                    email = signupModel.email,
+                    password = signupModel.cnfmPassword,
+                    kietLibId = signupModel.kietLibId
+                )
+            )
+        }
     }
 
     override suspend fun loggedIn(accountModel: AccountModel): EmptyResult<DataError.Local> {

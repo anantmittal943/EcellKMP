@@ -48,7 +48,7 @@ fun LoginFormTextField(
             modifier = modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                cursorColor = ColorAccentDark,
+                cursorColor = White,
                 focusedTextColor = White,
                 unfocusedTextColor = White,
                 focusedLabelColor = White,

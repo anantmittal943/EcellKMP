@@ -72,7 +72,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun LoginScreenRoot(
     viewModel: LoginViewModel = koinViewModel(),
-    onLoginClick: (loginModel: LoginModel) -> Unit,
+//    onLoginClick: (loginModel: LoginModel) -> Unit,
     onSignupClick: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -80,7 +80,7 @@ fun LoginScreenRoot(
         state = state,
         onAction = { action ->
             when (action) {
-                is LoginAction.OnLoginClick -> onLoginClick(action.loginModel)
+//                is LoginAction.OnLoginClick -> onLoginClick(action.loginModel)
                 is LoginAction.OnSignupClick -> onSignupClick()
                 else -> Unit
             }
@@ -198,7 +198,16 @@ private fun LoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = {},
+                onClick = {
+                    onAction(
+                        LoginAction.OnLoginClick(
+                            LoginModel(
+                                email = state.email,
+                                password = state.password
+                            )
+                        )
+                    )
+                },
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = ColorAccent),
                 elevation = ButtonDefaults.buttonElevation(4.dp),
