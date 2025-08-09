@@ -24,7 +24,18 @@ class DefaultEcellRepository(
         get() = ecellAuthSource.currentUser
 
     override suspend fun login(loginModel: LoginModel): EmptyResult<DataError.Remote> {
-        return ecellAuthSource.login(loginModel)
+        return ecellAuthSource.login(loginModel).onSuccess {
+            // TODO: Setup Logged in method for caching account data to room db local
+//            loggedIn(
+//                AccountModel(
+//                    id = currentUser.collect { it?.uid }.toString(),
+//                    name = signupModel.name,
+//                    email = signupModel.email,
+//                    password = signupModel.cnfmPassword,
+//                    kietLibId = signupModel.kietLibId
+//                )
+//            )
+        }
     }
 
     override suspend fun signup(signupModel: SignupModel): EmptyResult<DataError.Remote> {

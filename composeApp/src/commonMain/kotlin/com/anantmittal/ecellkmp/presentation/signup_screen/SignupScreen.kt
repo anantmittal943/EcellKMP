@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anantmittal.ecellkmp.domain.models.SignupModel
 import com.anantmittal.ecellkmp.presentation.login_screen.components.LoginEcellLogo
 import com.anantmittal.ecellkmp.presentation.login_screen.components.LoginFormTextField
+import com.anantmittal.ecellkmp.utility.domain.AppLogger
 import com.anantmittal.ecellkmp.utility.presentation.ColorAccent
 import com.anantmittal.ecellkmp.utility.presentation.ColorAccentDark
 import com.anantmittal.ecellkmp.utility.presentation.White
@@ -135,7 +136,9 @@ private fun SignupScreen(
                 onValueChange = {
                     onAction(SignupAction.OnNameChange(it))
                 },
+                onUnfocus = { onAction(SignupAction.OnNameFocusLost) },
                 modifier = Modifier,
+                error = state.nameError,
                 label = { Text("Name") },
                 leadingIcon = { Icon(painter = painterResource(Res.drawable.sm_user), contentDescription = null, Modifier.size(18.dp)) },
                 keyboardOptions = KeyboardOptions(
@@ -149,7 +152,9 @@ private fun SignupScreen(
                 onValueChange = {
                     onAction(SignupAction.OnEmailChange(it))
                 },
+                onUnfocus = { onAction(SignupAction.OnEmailFocusLost) },
                 modifier = Modifier,
+                error = state.emailError,
                 label = { Text("Email") },
                 leadingIcon = { Icon(painter = painterResource(Res.drawable.sm_email), contentDescription = null, Modifier.size(18.dp)) },
                 keyboardOptions = KeyboardOptions(
@@ -163,7 +168,9 @@ private fun SignupScreen(
                 onValueChange = {
                     onAction(SignupAction.OnKietLibIdChange(it))
                 },
+                onUnfocus = { onAction(SignupAction.OnKietLibIdFocusLost) },
                 modifier = Modifier,
+                error = state.kietLibIdError,
                 label = { Text("KIET Library ID") },
                 leadingIcon = { Icon(painter = painterResource(Res.drawable.sm_library_id), contentDescription = null, Modifier.size(18.dp)) },
                 keyboardOptions = KeyboardOptions(
@@ -177,7 +184,9 @@ private fun SignupScreen(
                 onValueChange = {
                     onAction(SignupAction.OnPasswordChange(it))
                 },
+                onUnfocus = { onAction(SignupAction.OnPasswordFocusLost) },
                 modifier = Modifier,
+                error = state.passwordError,
                 label = { Text("Password") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -202,7 +211,9 @@ private fun SignupScreen(
                 onValueChange = {
                     onAction(SignupAction.OnCnfmPasswordChange(it))
                 },
+                onUnfocus = { onAction(SignupAction.OnCnfmPasswordFocusLost) },
                 modifier = Modifier,
+                error = state.cnfmPasswordError,
                 label = { Text("Confirm Password") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -222,7 +233,9 @@ private fun SignupScreen(
                 }
             )
 
+            AppLogger.d("xyz", "button enabled or not ${state.isSignupButtonEnabled}")
             Button(
+                enabled = state.isSignupButtonEnabled,
                 onClick = {
                     onAction(
                         SignupAction.OnSignupClick(
@@ -236,7 +249,12 @@ private fun SignupScreen(
                     )
                 },
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = ColorAccent),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = ColorAccent,
+                    contentColor = White,
+                    disabledContainerColor = ColorAccent,
+                    disabledContentColor = White
+                ),
                 elevation = ButtonDefaults.buttonElevation(4.dp),
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
                 modifier = Modifier.fillMaxWidth(),
