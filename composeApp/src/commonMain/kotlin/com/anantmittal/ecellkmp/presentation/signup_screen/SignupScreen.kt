@@ -129,7 +129,7 @@ private fun SignupScreen(
                 .imePadding()
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.Top)
+            verticalArrangement = Arrangement.spacedBy(space = 8.dp, alignment = Alignment.Top)
         ) {
             LoginFormTextField(
                 value = state.name,

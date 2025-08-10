@@ -55,8 +55,7 @@ class SignupViewModel(
             else -> null
         }
 
-        val isButtonEnabled = nameError == null && emailError == null && kietLibIdError == null &&
-                passwordError == null && cnfmPasswordError == null
+        val isButtonEnabled = nameError == null && emailError == null && kietLibIdError == null && passwordError == null && cnfmPasswordError == null
 
         _state.update {
             it.copy(
