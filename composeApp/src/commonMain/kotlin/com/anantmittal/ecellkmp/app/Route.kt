@@ -4,6 +4,9 @@ import kotlinx.serialization.Serializable
 
 sealed interface Route {
 
+    val path: String
+        get() = this::class.qualifiedName ?: ""
+
     @Serializable
     data object AuthNavGraph : Route
 
@@ -24,5 +27,17 @@ sealed interface Route {
 
     @Serializable
     data object Home : Route
+
+    @Serializable
+    data object Explore : Route
+
+    @Serializable
+    data object Meetings : Route
+
+    @Serializable
+    data object CreateMeeting : Route
+
+    @Serializable
+    data object Account : Route
 
 }

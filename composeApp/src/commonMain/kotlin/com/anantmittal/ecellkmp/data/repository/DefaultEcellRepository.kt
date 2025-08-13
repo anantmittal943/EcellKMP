@@ -13,6 +13,7 @@ import com.anantmittal.ecellkmp.domain.repository.EcellRepository
 import com.anantmittal.ecellkmp.utility.domain.DataError
 import com.anantmittal.ecellkmp.utility.domain.EmptyResult
 import com.anantmittal.ecellkmp.utility.domain.Result
+import com.anantmittal.ecellkmp.utility.domain.onError
 import com.anantmittal.ecellkmp.utility.domain.onSuccess
 import kotlinx.coroutines.flow.Flow
 
@@ -25,7 +26,7 @@ class DefaultEcellRepository(
 
     override suspend fun login(loginModel: LoginModel): EmptyResult<DataError.Remote> {
         return ecellAuthSource.login(loginModel).onSuccess {
-            // TODO: Setup Logged in method for caching account data to room db local
+            // TODO: Setup loggedIn method for caching account data to room db local
 //            loggedIn(
 //                AccountModel(
 //                    id = currentUser.collect { it?.uid }.toString(),
@@ -36,6 +37,9 @@ class DefaultEcellRepository(
 //                )
 //            )
         }
+            .onError {
+                // TODO: Tell user about error
+            }
     }
 
     override suspend fun signup(signupModel: SignupModel): EmptyResult<DataError.Remote> {
