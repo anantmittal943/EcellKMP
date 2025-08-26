@@ -7,7 +7,7 @@ import com.anantmittal.ecellkmp.utility.presentation.UiText
 
 data class HomeState(
     val eventsGlimpses: List<EventsGlimpsesModel> = emptyList(),
-    val domains: List<DomainModel> = emptyList(),
+    val domainsList: List<DomainModel> = emptyList(),
     val teamMembers: List<AccountModel> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: UiText? = null

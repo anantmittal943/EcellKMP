@@ -14,6 +14,7 @@ import com.anantmittal.ecellkmp.presentation.login_screen.LoginViewModel
 import com.anantmittal.ecellkmp.presentation.signup_screen.SignupViewModel
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
+import dev.gitlive.firebase.firestore.firestore
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -24,6 +25,7 @@ expect val platformModule: Module
 
 val sharedModule = module {
     single { Firebase.auth }
+    single { Firebase.firestore }
     singleOf(::FirebaseEcellAuthSource).bind<EcellAuthSource>()
     singleOf(::KtorRemoteEcellDataSource).bind<RemoteEcellDataSource>()
     singleOf(::DefaultEcellRepository).bind<EcellRepository>()

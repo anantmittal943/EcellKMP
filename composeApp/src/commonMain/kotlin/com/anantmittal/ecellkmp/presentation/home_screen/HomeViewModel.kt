@@ -10,7 +10,9 @@ class HomeViewModel : ViewModel() {
 
     fun onAction(action: HomeAction) {
         when (action) {
-            else -> {}
+            is HomeAction.OnDomainClick -> TODO()
+            is HomeAction.OnEventGlimpseClick -> TODO()
+            is HomeAction.OnTeamMemberClick -> TODO()
         }
     }
 }

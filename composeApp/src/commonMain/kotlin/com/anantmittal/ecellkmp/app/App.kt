@@ -132,11 +132,10 @@ fun App(
                             startDestination = Route.Home
                         ) {
                             composable<Route.Home> {
-//                                val viewModel = koinViewModel<HomeViewModel>()
-//                                HomeScreenRoot(
-//                                    viewModel = viewModel
-//                                )
-                                Text("home")
+                                val viewModel = koinViewModel<HomeViewModel>()
+                                HomeScreenRoot(
+                                    viewModel = viewModel
+                                )
                             }
                             composable<Route.Account> {
                                 Text("account")
