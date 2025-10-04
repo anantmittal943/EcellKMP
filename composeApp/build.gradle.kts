@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+//    alias(libs.plugins.native.cocoapods)
 }
 
 kotlin {
@@ -29,6 +30,15 @@ kotlin {
             isStatic = true
         }
     }
+
+    /*cocoapods {
+        summary = "Shared KMP module for ComposeApp"
+        homepage = "https://github.com/anantmittal943/EcellKMP"
+        ios.deploymentTarget = "14.1"
+        pod("FirebaseCore")
+        pod("FirebaseFirestore")
+        pod("FirebaseAuth")
+    }*/
 
     room {
         schemaDirectory("$projectDir/schemas")
@@ -53,6 +63,7 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+//            implementation(libs.androidx.savedstate)
 
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
@@ -78,9 +89,6 @@ kotlin {
         }
         nativeMain.dependencies {
             implementation(libs.ktor.client.darwin)
-        }
-        dependencies {
-            ksp(libs.androidx.room.compiler)
         }
     }
 }
@@ -114,5 +122,5 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    ksp(libs.androidx.room.compiler)
 }
-
