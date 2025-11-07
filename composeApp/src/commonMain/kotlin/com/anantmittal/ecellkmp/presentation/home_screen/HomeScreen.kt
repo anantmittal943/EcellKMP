@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,12 +20,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.anantmittal.ecellkmp.presentation.home_screen.components.EventGlimpseBanner
-import com.anantmittal.ecellkmp.presentation.home_screen.components.ProfileCard
+import com.anantmittal.ecellkmp.presentation.home_screen.components.TeamMembersList
 import com.anantmittal.ecellkmp.utility.presentation.ColorAccentDark
 import com.anantmittal.ecellkmp.utility.presentation.White
 import ecellkmp.composeapp.generated.resources.Res
 import ecellkmp.composeapp.generated.resources.overlockreg
 import org.jetbrains.compose.resources.Font
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -42,13 +45,16 @@ private fun HomeScreen(
     state: HomeState,
     onAction: (HomeAction) -> Unit
 ) {
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .background(ColorAccentDark)
             .systemBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 10.dp)
             .displayCutoutPadding()
             .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
         Text(
             text = "Ecell",
@@ -58,11 +64,44 @@ private fun HomeScreen(
             fontFamily = FontFamily(Font(Res.font.overlockreg))
         )
         Spacer(Modifier.height(14.dp))
+
         EventGlimpseBanner(
             modifier = Modifier
         )
-        ProfileCard(
-            modifier = Modifier
-        )
+
+//        Spacer(Modifier.height(14.dp))
+
+//        ProfileCard(
+//            modifier = Modifier
+//        )
+
+        Spacer(Modifier.height(14.dp))
+
+        // Team Members Section
+        if (state.teamMembers.isNotEmpty()) {
+            TeamMembersList(
+                teamMembers = state.teamMembers,
+                onTeamMemberClick = { accountModel ->
+                    onAction(HomeAction.OnTeamMemberClick(accountModel))
+                },
+                onViewAllClick = {
+                    onAction(HomeAction.OnViewAllTeamMembersClick)
+                },
+                modifier = Modifier,
+                showViewAllButton = true,
+                itemsToShow = 6 // Show only 6 items initially
+            )
+        }
+
+        Spacer(Modifier.height(20.dp))
     }
+}
+
+@Preview
+@Composable
+private fun HomeScreenPreview() {
+    HomeScreen(
+        state = HomeState(),
+        onAction = {}
+    )
 }
