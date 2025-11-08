@@ -9,6 +9,7 @@ import com.anantmittal.ecellkmp.data.network.datasource.KtorRemoteEcellDataSourc
 import com.anantmittal.ecellkmp.data.network.datasource.RemoteEcellDataSource
 import com.anantmittal.ecellkmp.data.repository.DefaultEcellRepository
 import com.anantmittal.ecellkmp.domain.repository.EcellRepository
+import com.anantmittal.ecellkmp.presentation.account_screen.AccountViewModel
 import com.anantmittal.ecellkmp.presentation.home_screen.HomeViewModel
 import com.anantmittal.ecellkmp.presentation.login_screen.LoginViewModel
 import com.anantmittal.ecellkmp.presentation.signup_screen.SignupViewModel
@@ -40,4 +41,5 @@ val sharedModule = module {
     viewModelOf(::LoginViewModel)
     viewModelOf(::SignupViewModel)
     viewModelOf(::HomeViewModel)
+    viewModelOf(::AccountViewModel)
 }

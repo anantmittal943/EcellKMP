@@ -7,7 +7,6 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,6 +24,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.anantmittal.ecellkmp.domain.repository.EcellRepository
+import com.anantmittal.ecellkmp.presentation.account_screen.AccountScreenRoot
+import com.anantmittal.ecellkmp.presentation.account_screen.AccountViewModel
 import com.anantmittal.ecellkmp.presentation.bottom_navigation.BottomNavItemState
 import com.anantmittal.ecellkmp.presentation.bottom_navigation.BottomNavigationBar
 import com.anantmittal.ecellkmp.presentation.home_screen.HomeScreenRoot
@@ -36,12 +37,10 @@ import com.anantmittal.ecellkmp.presentation.signup_screen.SignupViewModel
 import com.anantmittal.ecellkmp.presentation.splash_screen.SplashScreen
 import com.anantmittal.ecellkmp.utility.presentation.animations.CrossFadeTransition
 import kotlinx.coroutines.delay
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-@Preview
 fun App(
 ) {
     var showSplash by remember { mutableStateOf(true) }
@@ -63,7 +62,8 @@ fun App(
 
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentGraphRoute = navBackStackEntry?.destination?.parent?.route
-                val showBottomBar = currentGraphRoute == Route.NormalNavGraph.path || currentGraphRoute == Route.TeamNavGraph.path
+                val showBottomBar =
+                    currentGraphRoute == Route.NormalNavGraph.path || currentGraphRoute == Route.TeamNavGraph.path // || currentGraphRoute == Route.AuthNavGraph.path
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -86,6 +86,13 @@ fun App(
                                             BottomNavItemState("Account", Icons.Default.AccountCircle, Route.Account)
                                         )
                                     }
+
+//                                    Route.AuthNavGraph.path -> {
+//                                        listOf(
+//                                            BottomNavItemState("Home", Icons.Default.Home, Route.Home),
+//                                            BottomNavItemState("Login", Icons.Default.Login, Route.Login)
+//                                        )
+//                                    }
 
                                     else -> {
                                         emptyList()
@@ -126,6 +133,12 @@ fun App(
 //                                onSignupClick = { signupModel -> },
                                 )
                             }
+                            composable<Route.Home> {
+                                val viewModel = koinViewModel<HomeViewModel>()
+                                HomeScreenRoot(
+                                    viewModel = viewModel
+                                )
+                            }
                         }
                         // Authenticated Normal Navigation Graph
                         navigation<Route.NormalNavGraph>(
@@ -138,7 +151,10 @@ fun App(
                                 )
                             }
                             composable<Route.Account> {
-                                Text("account")
+                                val viewModel = koinViewModel<AccountViewModel>()
+                                AccountScreenRoot(
+                                    viewModel = viewModel
+                                )
                             }
                         }
                         // Authenticated Team Navigation Graph
@@ -151,7 +167,12 @@ fun App(
                                     viewModel = viewModel
                                 )
                             }
-                            composable<Route.Account> {}
+                            composable<Route.Account> {
+                                val viewModel = koinViewModel<AccountViewModel>()
+                                AccountScreenRoot(
+                                    viewModel = viewModel
+                                )
+                            }
                             composable<Route.Meetings> {}
                             composable<Route.CreateMeeting> {}
                         }
