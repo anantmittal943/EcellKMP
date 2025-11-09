@@ -18,34 +18,25 @@ import com.anantmittal.ecellkmp.utility.domain.DataError
 import com.anantmittal.ecellkmp.utility.domain.EmptyResult
 import com.anantmittal.ecellkmp.utility.domain.Result
 import com.anantmittal.ecellkmp.utility.domain.Variables
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 
 class DefaultEcellRepository(
     private val ecellAuthSource: EcellAuthSource,
     private val ecellAccountsDao: EcellAccountsDao
 ) : EcellRepository {
-    private val repoScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     override val currentUser: Flow<User?>
         get() = ecellAuthSource.currentUser
 
-    private val _account = MutableStateFlow<AccountModel?>(null)
-    override val account: StateFlow<AccountModel?>
-        get() = _account.asStateFlow()
 
     override suspend fun login(loginModel: LoginModel): Result<AccountModel, DataError.Remote> {
+        AppLogger.d(Variables.TAG, "Starting login for email: ${loginModel.email}")
         return when (val authResult = ecellAuthSource.login(loginModel)) {
             is Result.Success -> {
+                AppLogger.d(Variables.TAG, "Login auth successful, loading account remotely...")
                 when (val accountResult = loadAccountRemotely(loginModel.email)) {
                     is Result.Success -> {
-                        _account.value = accountResult.data
+                        AppLogger.d(Variables.TAG, "Login completed successfully for: ${accountResult.data.name}")
                         Result.Success(accountResult.data)
                     }
 
@@ -64,17 +55,21 @@ class DefaultEcellRepository(
     }
 
     override suspend fun signup(signupModel: SignupModel): Result<AccountModel, DataError.Remote> {
+        AppLogger.d(Variables.TAG, "Starting signup for email: ${signupModel.email}, name: ${signupModel.name}")
         return when (val authResult = ecellAuthSource.signup(signupModel)) {
             is Result.Success -> {
+                AppLogger.d(Variables.TAG, "Signup auth successful, getting current user...")
                 val user = currentUser.first()
                 val uid = user?.uid
+                AppLogger.d(Variables.TAG, "Current user UID: $uid")
                 val accountToCreate = signupModel.toAccountModel(uid ?: "error_uid_not_found")
 
                 when (val createResult = createAccountDbRemotely(accountToCreate)) {
                     is Result.Success -> {
+                        AppLogger.d(Variables.TAG, "Account DB created remotely, loading account...")
                         when (val loadResult = loadAccountRemotely(signupModel.email)) {
                             is Result.Success -> {
-                                _account.value = loadResult.data
+                                AppLogger.d(Variables.TAG, "Signup completed successfully for: ${loadResult.data.name}")
                                 Result.Success(loadResult.data)
                             }
 
@@ -101,27 +96,42 @@ class DefaultEcellRepository(
 
     private suspend fun createAccountDbRemotely(accountModel: AccountModel): EmptyResult<DataError.Remote> {
         return try {
+            AppLogger.d(Variables.TAG, "Creating account DB remotely for: ${accountModel.email}")
             ecellAuthSource.createAccountDb(accountModel.toAccountDTO())
+            AppLogger.d(Variables.TAG, "Account DB created successfully for: ${accountModel.email}")
             Result.Success(Unit)
         } catch (e: Exception) {
             e.printStackTrace()
-            AppLogger.e(Variables.TAG, "Error in createAccountDbRemotely: $e")
+            AppLogger.e(Variables.TAG, "Error in createAccountDbRemotely for ${accountModel.email}: ${e.message}")
             Result.Error(DataError.Remote.UNKNOWN)
         }
     }
 
     private suspend fun loadAccountRemotely(email: String): Result<AccountModel, DataError.Remote> {
+        AppLogger.d(Variables.TAG, "Loading account remotely for email: $email")
         return when (val result = ecellAuthSource.getAccountDb(email)) {
             is Result.Success -> {
+                AppLogger.d(Variables.TAG, "Account DTO retrieved from remote: ${result.data}")
                 val accountModel = result.data.toAccountModel()
-                cacheLoggedInAccount(accountModel)
-                _account.value = accountModel
-                AppLogger.d(Variables.TAG, "Account loaded remotely: $accountModel")
+                AppLogger.d(Variables.TAG, "Account DTO converted to model: ${accountModel.email}, name: ${accountModel.name}")
+
+                AppLogger.d(Variables.TAG, "Caching account locally...")
+                when (val cacheResult = cacheLoggedInAccount(accountModel)) {
+                    is Result.Success -> {
+                        AppLogger.d(Variables.TAG, "Account cached successfully")
+                    }
+
+                    is Result.Error -> {
+                        AppLogger.e(Variables.TAG, "Failed to cache account: ${cacheResult.error}")
+                    }
+                }
+
+                AppLogger.d(Variables.TAG, "Account loaded remotely successfully: ${accountModel.email}")
                 Result.Success(accountModel)
             }
 
             is Result.Error -> {
-                AppLogger.e(Variables.TAG, "Error loading account remotely: ${result.error}")
+                AppLogger.e(Variables.TAG, "Error loading account remotely for $email: ${result.error}")
                 Result.Error(result.error)
             }
         }
@@ -129,27 +139,49 @@ class DefaultEcellRepository(
 
     private suspend fun cacheLoggedInAccount(accountModel: AccountModel): EmptyResult<DataError.Local> {
         return try {
-            ecellAccountsDao.upsert(accountModel.toAccountEntity())
+            AppLogger.d(Variables.TAG, "Attempting to cache account: ${accountModel.email}")
+            val entity = accountModel.toAccountEntity()
+            AppLogger.d(Variables.TAG, "Account entity created: ${entity.email}")
+            ecellAccountsDao.upsert(entity)
+            AppLogger.d(Variables.TAG, "Account upserted successfully: ${accountModel.email}")
             Result.Success(Unit)
         } catch (e: SQLiteException) {
             e.printStackTrace()
-            AppLogger.d(Variables.TAG, "Error in cacheLoggedInAccount: $e")
+            AppLogger.e(Variables.TAG, "SQLiteException in cacheLoggedInAccount for ${accountModel.email}: ${e.message}")
             Result.Error(DataError.Local.UNKNOWN)
         } catch (e: Exception) {
             e.printStackTrace()
+            AppLogger.e(Variables.TAG, "Exception in cacheLoggedInAccount for ${accountModel.email}: ${e.message}")
             Result.Error(DataError.Local.UNKNOWN)
         }
     }
 
     override suspend fun loadAccountLocally(email: String): Result<AccountModel, DataError.Local> {
         return try {
-            Result.Success(ecellAccountsDao.getAccountById(email)!!.toAccountModel())
+            AppLogger.d(Variables.TAG, "Loading account locally for email: $email")
+            val entity = ecellAccountsDao.getAccountById(email)
+            AppLogger.d(Variables.TAG, "Account entity retrieved: ${entity?.email ?: "NULL"}")
+
+            if (entity == null) {
+                AppLogger.e(Variables.TAG, "Account entity is NULL for email: $email")
+                Result.Error(DataError.Local.NULL)
+            } else {
+                val accountModel = entity.toAccountModel()
+                AppLogger.d(Variables.TAG, "Account loaded locally successfully: ${accountModel.email}, name: ${accountModel.name}")
+                Result.Success(accountModel)
+            }
         } catch (e: SQLiteException) {
             e.printStackTrace()
+            AppLogger.e(Variables.TAG, "SQLiteException in loadAccountLocally for $email: ${e.message}")
             Result.Error(DataError.Local.UNKNOWN)
         } catch (e: NullPointerException) {
             e.printStackTrace()
+            AppLogger.e(Variables.TAG, "NullPointerException in loadAccountLocally for $email: ${e.message}")
             Result.Error(DataError.Local.NULL)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            AppLogger.e(Variables.TAG, "Exception in loadAccountLocally for $email: ${e.message}")
+            Result.Error(DataError.Local.UNKNOWN)
         }
     }
 

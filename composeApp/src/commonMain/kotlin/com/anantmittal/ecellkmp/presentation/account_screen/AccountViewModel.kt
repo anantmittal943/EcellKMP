@@ -4,11 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anantmittal.ecellkmp.domain.repository.EcellRepository
 import com.anantmittal.ecellkmp.utility.domain.AppLogger
+import com.anantmittal.ecellkmp.utility.domain.Result
 import com.anantmittal.ecellkmp.utility.domain.Variables
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AccountViewModel(
@@ -18,45 +17,50 @@ class AccountViewModel(
     val state = _state.asStateFlow()
 
     init {
-        observeAccount()
+        loadCurrentUserAccount()
     }
 
-    private fun observeAccount() {
+    private fun loadCurrentUserAccount() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            ecellRepository.account.collectLatest { accountModel ->
-                if (accountModel != null) {
-                    _state.update { it.copy(isLoading = false, account = accountModel) }
+            _state.value = _state.value.copy(isLoading = true)
+
+            ecellRepository.currentUser.collect { user ->
+                if (user != null) {
+                    AppLogger.d(Variables.TAG, "Current user: ${user.email}")
+                    loadAccountFromLocal(user.email)
                 } else {
-                    _state.update { it.copy(isLoading = true, account = null) }
+                    AppLogger.d(Variables.TAG, "No current user found")
+                    _state.value = _state.value.copy(
+                        account = null,
+                        isLoading = false
+                    )
                 }
             }
         }
     }
 
-//    private fun loadCurrentUserAccount() {
-//        viewModelScope.launch {
-//            _state.value = _state.value.copy(isLoading = true)
-//
-//            ecellRepository.currentUser.collect { user ->
-//                if (user != null) {
-//                    AppLogger.d(Variables.TAG, "Current user: ${user.email}")
-//                    loadAccountFromLocal(user.email)
-//                } else {
-//                    AppLogger.d(Variables.TAG, "No current user found")
-//                    _state.value = _state.value.copy(
-//                        account = null,
-//                        isLoading = false
-//                    )
-//                }
-//            }
-//        }
-//    }
-//
-//    private suspend fun loadAccountFromLocal(email: String) {
-//        when (val result = ecellRepository.loadAccountLocally(email)) {
+    private suspend fun loadAccountFromLocal(email: String) {
+        when (val result = ecellRepository.loadAccountLocally(email)) {
+            is Result.Success -> {
+                AppLogger.d(Variables.TAG, "Account loaded successfully from local: ${result.data.name}")
+                _state.value = _state.value.copy(
+                    account = result.data,
+                    isLoading = false
+                )
+            }
+
+            is Result.Error -> {
+                AppLogger.e(Variables.TAG, "Failed to load account from local: ${result.error}, trying remote...")
+                // Fallback: Try loading from remote if local fails
+//                loadAccountFromRemote(email)
+            }
+        }
+    }
+
+//    private suspend fun loadAccountFromRemote(email: String) {
+//        when (val result = ecellRepository.loadAccountRemotely(email)) {
 //            is Result.Success -> {
-//                AppLogger.d(Variables.TAG, "Account loaded successfully: ${result.data.name}")
+//                AppLogger.d(Variables.TAG, "Account loaded successfully from remote: ${result.data.name}")
 //                _state.value = _state.value.copy(
 //                    account = result.data,
 //                    isLoading = false
@@ -64,7 +68,7 @@ class AccountViewModel(
 //            }
 //
 //            is Result.Error -> {
-//                AppLogger.e(Variables.TAG, "Failed to load account: ${result.error}")
+//                AppLogger.e(Variables.TAG, "Failed to load account from remote: ${result.error}")
 //                _state.value = _state.value.copy(
 //                    account = null,
 //                    isLoading = false

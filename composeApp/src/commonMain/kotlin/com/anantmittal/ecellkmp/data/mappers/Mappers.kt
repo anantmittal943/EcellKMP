@@ -5,9 +5,12 @@ import com.anantmittal.ecellkmp.data.dto.AccountDTO
 import com.anantmittal.ecellkmp.domain.models.AccountModel
 import com.anantmittal.ecellkmp.domain.models.SignupModel
 import com.anantmittal.ecellkmp.domain.models.User
+import com.anantmittal.ecellkmp.utility.domain.AppLogger
+import com.anantmittal.ecellkmp.utility.domain.Variables
 import dev.gitlive.firebase.auth.FirebaseUser
 
 fun AccountModel.toAccountEntity(): EcellAccountsEntity {
+    AppLogger.d(Variables.TAG, "Mapper: Converting AccountModel to Entity - email: $email, name: $name")
     return EcellAccountsEntity(
         id = id,
         name = name,
@@ -19,6 +22,7 @@ fun AccountModel.toAccountEntity(): EcellAccountsEntity {
 }
 
 fun EcellAccountsEntity.toAccountModel(): AccountModel {
+    AppLogger.d(Variables.TAG, "Mapper: Converting Entity to AccountModel - email: $email, name: $name")
     return AccountModel(
         id = id,
         name = name,
@@ -30,6 +34,7 @@ fun EcellAccountsEntity.toAccountModel(): AccountModel {
 }
 
 fun AccountDTO.toAccountModel(): AccountModel {
+    AppLogger.d(Variables.TAG, "Mapper: Converting DTO to AccountModel - email: $email, name: $name, id: $id")
     return AccountModel(
         id = id,
         name = name,

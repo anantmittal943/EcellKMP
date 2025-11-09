@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "887068944759-o6rhl6q3937v9ivot5jtjrs2du6i9i9o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anantmittal.ecellkmp",
+            "certificate_hash": "72de987200ebd9eedbca9f35f3e1ee64e181dece"
+          }
+        },
+        {
           "client_id": "887068944759-mbghmh22snekk4ifa8pil4n0bik4u2ag.apps.googleusercontent.com",
           "client_type": 3
         }
