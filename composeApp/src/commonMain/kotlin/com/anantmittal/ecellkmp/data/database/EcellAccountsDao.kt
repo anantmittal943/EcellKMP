@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
 import androidx.room.Upsert
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EcellAccountsDao {
@@ -17,9 +16,9 @@ interface EcellAccountsDao {
 //    @Query("SELECT * FROM EcellAccountsEntity LIMIT 1")
 //    fun getAccountDetail() : Flow<EcellAccountsEntity>
 
-    @Query("SELECT * FROM EcellAccountsEntity WHERE id = :uid")
-    suspend fun getAccountById(uid: String): EcellAccountsEntity?
+    @Query("SELECT * FROM EcellAccountsEntity WHERE email = :email")
+    suspend fun getAccountById(email: String): EcellAccountsEntity?
 
     @Query("DELETE FROM EcellAccountsEntity WHERE id = :uid")
-    suspend fun logout(uid: String)
+    suspend fun logout(uid: String) // TODO: change uid
 }

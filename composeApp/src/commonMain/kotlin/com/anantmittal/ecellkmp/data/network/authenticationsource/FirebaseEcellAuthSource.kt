@@ -75,12 +75,29 @@ class FirebaseEcellAuthSource(
         }
     }
 
-    override suspend fun getAccountDb(uid: String): Result<AccountDTO, DataError.Remote> {
-        TODO("Not yet implemented")
+    override suspend fun getAccountDb(email: String): Result<AccountDTO, DataError.Remote> {
+        return try {
+            val querySnapshot = firebaseFirestore.collection(Variables.TEAM_MEMBERS_TAG)
+                .where { "email" equalTo email }
+                .get()
+
+            if (querySnapshot.documents.isEmpty()) {
+                AppLogger.d(Variables.TAG, "No account found with email: $email")
+                Result.Error(DataError.Remote.UNKNOWN)
+            } else {
+                val document = querySnapshot.documents.first()
+                val accountDTO = document.data<AccountDTO>()
+                AppLogger.d(Variables.TAG, "Account found: ${document.id} => $accountDTO")
+                Result.Success(accountDTO)
+            }
+        } catch (e: FirebaseFirestoreException) {
+            e.printStackTrace()
+            AppLogger.d(Variables.TAG, "Error getting account: $e")
+            Result.Error(DataError.Remote.UNKNOWN)
+        }
     }
 
     override suspend fun signOut() {
         firebaseAuth.signOut()
     }
-
 }

@@ -18,8 +18,6 @@ import com.anantmittal.ecellkmp.utility.domain.DataError
 import com.anantmittal.ecellkmp.utility.domain.EmptyResult
 import com.anantmittal.ecellkmp.utility.domain.Result
 import com.anantmittal.ecellkmp.utility.domain.Variables
-import com.anantmittal.ecellkmp.utility.domain.onError
-import com.anantmittal.ecellkmp.utility.domain.onSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -29,61 +27,99 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class DefaultEcellRepository(
-    private val ecellAuthSource: EcellAuthSource,
-    private val ecellAccountsDao: EcellAccountsDao
+    private val ecellAuthSource: EcellAuthSource, private val ecellAccountsDao: EcellAccountsDao
 ) : EcellRepository {
     private val repoScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     override val currentUser: Flow<User?>
         get() = ecellAuthSource.currentUser
 
-    override suspend fun login(loginModel: LoginModel): EmptyResult<DataError.Remote> {
-        return ecellAuthSource.login(loginModel).onSuccess {
-//            loadAccountRemotely()
-            // TODO: Setup cacheLoggedInAccount method for caching account data to room db local
-//            cacheLoggedInAccount(
-//                AccountModel(
-//                    id = currentUser.collect { it?.uid }.toString(),
-//                    name = signupModel.name,
-//                    email = signupModel.email,
-//                    password = signupModel.cnfmPassword,
-//                    kietLibId = signupModel.kietLibId
-//                )
-//            )
-        }
-            .onError {
-                // TODO: Tell user about error
+    override suspend fun login(loginModel: LoginModel): Result<AccountModel, DataError.Remote> {
+        return when (val authResult = ecellAuthSource.login(loginModel)) {
+            is Result.Success -> {
+                when (val accountResult = loadAccountRemotely(loginModel.email)) {
+                    is Result.Success -> {
+                        Result.Success(accountResult.data)
+                    }
+
+                    is Result.Error -> {
+                        AppLogger.e(Variables.TAG, "Login auth succeeded but failed to load account: ${accountResult.error}")
+                        Result.Error(accountResult.error)
+                    }
+                }
             }
-    }
 
-    override suspend fun signup(signupModel: SignupModel): EmptyResult<DataError.Remote> {
-        return ecellAuthSource.signup(signupModel).onSuccess {
-            val user = currentUser.first()
-            val uid = user?.uid
-            val accountToCreate = signupModel.toAccountModel(uid ?: "error_uid_not_found")
-
-            repoScope.launch {
-                createAccountDbRemotely(accountToCreate)
-                cacheLoggedInAccount(accountToCreate)
+            is Result.Error -> {
+                AppLogger.e(Variables.TAG, "Login authentication failed: ${authResult.error}")
+                Result.Error(authResult.error)
             }
         }
     }
 
-    override suspend fun createAccountDbRemotely(accountModel: AccountModel): EmptyResult<DataError.Remote> {
+    override suspend fun signup(signupModel: SignupModel): Result<AccountModel, DataError.Remote> {
+        return when (val authResult = ecellAuthSource.signup(signupModel)) {
+            is Result.Success -> {
+                val user = currentUser.first()
+                val uid = user?.uid
+                val accountToCreate = signupModel.toAccountModel(uid ?: "error_uid_not_found")
+
+                when (val createResult = createAccountDbRemotely(accountToCreate)) {
+                    is Result.Success -> {
+                        when (val loadResult = loadAccountRemotely(signupModel.email)) {
+                            is Result.Success -> {
+                                Result.Success(loadResult.data)
+                            }
+
+                            is Result.Error -> {
+                                AppLogger.e(Variables.TAG, "Signup succeeded but failed to load account: ${loadResult.error}")
+                                Result.Error(loadResult.error)
+                            }
+                        }
+                    }
+
+                    is Result.Error -> {
+                        AppLogger.e(Variables.TAG, "Signup succeeded but failed to create account DB: ${createResult.error}")
+                        Result.Error(createResult.error)
+                    }
+                }
+            }
+
+            is Result.Error -> {
+                AppLogger.e(Variables.TAG, "Signup authentication failed: ${authResult.error}")
+                Result.Error(authResult.error)
+            }
+        }
+    }
+
+    private suspend fun createAccountDbRemotely(accountModel: AccountModel): EmptyResult<DataError.Remote> {
         return try {
             ecellAuthSource.createAccountDb(accountModel.toAccountDTO())
             Result.Success(Unit)
         } catch (e: Exception) {
             e.printStackTrace()
-            AppLogger.d(Variables.TAG, "Error in createAccountDbRemotely: $e")
+            AppLogger.e(Variables.TAG, "Error in createAccountDbRemotely: $e")
             Result.Error(DataError.Remote.UNKNOWN)
         }
     }
 
-    override suspend fun loadAccountRemotely(uid: String): Result<AccountModel, DataError.Remote> {
-        TODO("Not yet implemented")
+    private suspend fun loadAccountRemotely(email: String): Result<AccountModel, DataError.Remote> {
+        return when (val result = ecellAuthSource.getAccountDb(email)) {
+            is Result.Success -> {
+                val accountModel = result.data.toAccountModel()
+                repoScope.launch {
+                    cacheLoggedInAccount(accountModel)
+                }
+                AppLogger.d(Variables.TAG, "Account loaded remotely: $accountModel")
+                Result.Success(accountModel)
+            }
+
+            is Result.Error -> {
+                AppLogger.e(Variables.TAG, "Error loading account remotely: ${result.error}")
+                Result.Error(result.error)
+            }
+        }
     }
 
-    override suspend fun cacheLoggedInAccount(accountModel: AccountModel): EmptyResult<DataError.Local> {
+    private suspend fun cacheLoggedInAccount(accountModel: AccountModel): EmptyResult<DataError.Local> {
         return try {
             ecellAccountsDao.upsert(accountModel.toAccountEntity())
             Result.Success(Unit)
@@ -97,9 +133,9 @@ class DefaultEcellRepository(
         }
     }
 
-    override suspend fun loadAccountLocally(uid: String): Result<AccountModel, DataError.Local> {
+    override suspend fun loadAccountLocally(email: String): Result<AccountModel, DataError.Local> {
         return try {
-            Result.Success(ecellAccountsDao.getAccountById(uid)!!.toAccountModel())
+            Result.Success(ecellAccountsDao.getAccountById(email)!!.toAccountModel())
         } catch (e: SQLiteException) {
             e.printStackTrace()
             Result.Error(DataError.Local.UNKNOWN)
@@ -113,7 +149,7 @@ class DefaultEcellRepository(
         TODO("Not yet implemented")
     }
 
-    override suspend fun cacheEvents(): EmptyResult<DataError.Local> {
+    private suspend fun cacheEvents(): EmptyResult<DataError.Local> {
         TODO("Not yet implemented")
     }
 
@@ -125,7 +161,7 @@ class DefaultEcellRepository(
         TODO("Not yet implemented")
     }
 
-    override suspend fun cacheDomains(): EmptyResult<DataError.Local> {
+    private suspend fun cacheDomains(): EmptyResult<DataError.Local> {
         TODO("Not yet implemented")
     }
 
