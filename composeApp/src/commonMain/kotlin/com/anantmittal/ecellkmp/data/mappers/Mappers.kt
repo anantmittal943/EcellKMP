@@ -109,6 +109,7 @@ fun SignupModel.toAccountModel(id: String): AccountModel {
 
 fun FirebaseUser.toUser(): User {
     return User(
-        uid = uid
+        uid = uid,
+        email = email!!
     )
 }
