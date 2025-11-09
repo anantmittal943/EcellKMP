@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,11 +30,11 @@ import com.anantmittal.ecellkmp.presentation.account_screen.components.Additiona
 import com.anantmittal.ecellkmp.presentation.account_screen.components.PersonalInfoCard
 import com.anantmittal.ecellkmp.presentation.account_screen.components.ProfileHeader
 import com.anantmittal.ecellkmp.presentation.account_screen.components.SocialLinksCard
-import com.anantmittal.ecellkmp.utility.presentation.ColorAccent
 import com.anantmittal.ecellkmp.utility.presentation.ColorAccentDark
 import com.anantmittal.ecellkmp.utility.presentation.ColorAccentLightest
 import com.anantmittal.ecellkmp.utility.presentation.ErrorRed
 import com.anantmittal.ecellkmp.utility.presentation.White
+import com.anantmittal.ecellkmp.utility.presentation.components.LoadingIndicator
 import ecellkmp.composeapp.generated.resources.Res
 import ecellkmp.composeapp.generated.resources.main_font
 import org.jetbrains.compose.resources.Font
@@ -66,10 +65,7 @@ private fun AccountScreen(
             .background(ColorAccentDark)
     ) {
         if (state.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = ColorAccent
-            )
+            LoadingIndicator()
         } else if (state.account != null) {
             Column(
                 modifier = Modifier

@@ -1,6 +1,7 @@
 package com.anantmittal.ecellkmp.presentation.home_screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.displayCutoutPadding
@@ -23,6 +24,7 @@ import com.anantmittal.ecellkmp.presentation.home_screen.components.EventGlimpse
 import com.anantmittal.ecellkmp.presentation.home_screen.components.TeamMembersList
 import com.anantmittal.ecellkmp.utility.presentation.ColorAccentDark
 import com.anantmittal.ecellkmp.utility.presentation.White
+import com.anantmittal.ecellkmp.utility.presentation.components.LoadingIndicator
 import ecellkmp.composeapp.generated.resources.Res
 import ecellkmp.composeapp.generated.resources.overlockreg
 import org.jetbrains.compose.resources.Font
@@ -47,15 +49,19 @@ private fun HomeScreen(
 ) {
     val scrollState = rememberScrollState()
 
-    Column(
+    Box(
         modifier = Modifier
-            .background(ColorAccentDark)
-            .systemBarsPadding()
-            .displayCutoutPadding()
             .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .background(ColorAccentDark)
     ) {
+        Column(
+            modifier = Modifier
+                .systemBarsPadding()
+                .displayCutoutPadding()
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
+        ) {
         Text(
             text = "Ecell",
             textAlign = TextAlign.Center,
@@ -94,6 +100,11 @@ private fun HomeScreen(
         }
 
         Spacer(Modifier.height(20.dp))
+    }
+
+        if (state.isLoading) {
+            LoadingIndicator()
+        }
     }
 }
 

@@ -31,7 +31,7 @@ fun EcellAccountsEntity.toAccountModel(): AccountModel {
 
 fun AccountDTO.toAccountModel(): AccountModel {
     return AccountModel(
-        id = "",
+        id = id,
         name = name,
         email = email,
         password = password!!,

@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -51,6 +52,7 @@ import com.anantmittal.ecellkmp.presentation.login_screen.components.LoginFormTe
 import com.anantmittal.ecellkmp.utility.presentation.ColorAccent
 import com.anantmittal.ecellkmp.utility.presentation.ColorAccentDark
 import com.anantmittal.ecellkmp.utility.presentation.White
+import com.anantmittal.ecellkmp.utility.presentation.components.LoadingIndicator
 import ecellkmp.composeapp.generated.resources.Res
 import ecellkmp.composeapp.generated.resources.img
 import ecellkmp.composeapp.generated.resources.leaguespartansemireg
@@ -86,19 +88,23 @@ private fun LoginScreen(
     state: LoginState,
     onAction: (LoginAction) -> Unit
 ) {
-    Column(
+    Box(
         modifier = Modifier
-            .background(ColorAccentDark)
-            .systemBarsPadding()
-            .systemGesturesPadding()
-            .displayCutoutPadding()
             .fillMaxSize()
+            .background(ColorAccentDark)
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .systemBarsPadding()
+                .systemGesturesPadding()
+                .displayCutoutPadding()
+                .fillMaxSize()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
                 horizontalAlignment = Alignment.Start,
@@ -248,5 +254,10 @@ private fun LoginScreen(
         LoginEcellLogo(
             modifier = Modifier
         )
+    }
+
+        if (state.isLoading) {
+            LoadingIndicator()
+        }
     }
 }

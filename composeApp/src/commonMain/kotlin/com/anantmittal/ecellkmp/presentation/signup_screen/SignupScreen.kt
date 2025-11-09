@@ -3,6 +3,7 @@ package com.anantmittal.ecellkmp.presentation.signup_screen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -46,6 +47,7 @@ import com.anantmittal.ecellkmp.utility.domain.AppLogger
 import com.anantmittal.ecellkmp.utility.presentation.ColorAccent
 import com.anantmittal.ecellkmp.utility.presentation.ColorAccentDark
 import com.anantmittal.ecellkmp.utility.presentation.White
+import com.anantmittal.ecellkmp.utility.presentation.components.LoadingIndicator
 import ecellkmp.composeapp.generated.resources.Res
 import ecellkmp.composeapp.generated.resources.leaguespartansemireg
 import ecellkmp.composeapp.generated.resources.overlockreg
@@ -83,14 +85,18 @@ private fun SignupScreen(
     state: SignupState,
     onAction: (SignupAction) -> Unit
 ) {
-    Column(
+    Box(
         modifier = Modifier
-            .background(ColorAccentDark)
-            .systemBarsPadding()
-            .systemGesturesPadding()
-            .displayCutoutPadding()
             .fillMaxSize()
+            .background(ColorAccentDark)
     ) {
+        Column(
+            modifier = Modifier
+                .systemBarsPadding()
+                .systemGesturesPadding()
+                .displayCutoutPadding()
+                .fillMaxSize()
+        ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -271,5 +277,10 @@ private fun SignupScreen(
         LoginEcellLogo(
             modifier = Modifier
         )
+    }
+
+        if (state.isLoading) {
+            LoadingIndicator()
+        }
     }
 }

@@ -23,21 +23,29 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 class DefaultEcellRepository(
-    private val ecellAuthSource: EcellAuthSource, private val ecellAccountsDao: EcellAccountsDao
+    private val ecellAuthSource: EcellAuthSource,
+    private val ecellAccountsDao: EcellAccountsDao
 ) : EcellRepository {
     private val repoScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     override val currentUser: Flow<User?>
         get() = ecellAuthSource.currentUser
+
+    private val _account = MutableStateFlow<AccountModel?>(null)
+    override val account: StateFlow<AccountModel?>
+        get() = _account.asStateFlow()
 
     override suspend fun login(loginModel: LoginModel): Result<AccountModel, DataError.Remote> {
         return when (val authResult = ecellAuthSource.login(loginModel)) {
             is Result.Success -> {
                 when (val accountResult = loadAccountRemotely(loginModel.email)) {
                     is Result.Success -> {
+                        _account.value = accountResult.data
                         Result.Success(accountResult.data)
                     }
 
@@ -66,6 +74,7 @@ class DefaultEcellRepository(
                     is Result.Success -> {
                         when (val loadResult = loadAccountRemotely(signupModel.email)) {
                             is Result.Success -> {
+                                _account.value = loadResult.data
                                 Result.Success(loadResult.data)
                             }
 
@@ -105,9 +114,8 @@ class DefaultEcellRepository(
         return when (val result = ecellAuthSource.getAccountDb(email)) {
             is Result.Success -> {
                 val accountModel = result.data.toAccountModel()
-                repoScope.launch {
-                    cacheLoggedInAccount(accountModel)
-                }
+                cacheLoggedInAccount(accountModel)
+                _account.value = accountModel
                 AppLogger.d(Variables.TAG, "Account loaded remotely: $accountModel")
                 Result.Success(accountModel)
             }
