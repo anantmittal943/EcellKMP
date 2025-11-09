@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "766370349366931c8d6393919a102518",
+    "identityHash": "0c05857cbbb8bb68f6c315b9ba91f43c",
     "entities": [
       {
         "tableName": "EcellAccountsEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `email` TEXT NOT NULL, `password` TEXT NOT NULL, `kietLibId` TEXT NOT NULL, `phoneNumber` INTEGER, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `email` TEXT NOT NULL, `password` TEXT NOT NULL, `kietLibId` TEXT NOT NULL, `phoneNumber` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -41,7 +41,8 @@
           {
             "fieldPath": "phoneNumber",
             "columnName": "phoneNumber",
-            "affinity": "INTEGER"
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -54,7 +55,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '766370349366931c8d6393919a102518')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0c05857cbbb8bb68f6c315b9ba91f43c')"
     ]
   }
 }

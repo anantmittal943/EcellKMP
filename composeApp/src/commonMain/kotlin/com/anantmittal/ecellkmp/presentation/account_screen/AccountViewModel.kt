@@ -26,10 +26,10 @@ class AccountViewModel(
 
             ecellRepository.currentUser.collect { user ->
                 if (user != null) {
-                    AppLogger.d(Variables.TAG, "Current user: ${user.email}")
-                    loadAccountFromLocal(user.email)
+                    AppLogger.d(Variables.TAG, "AccountVM: Current user found: ${user.email}")
+                    loadAccount(user.email)
                 } else {
-                    AppLogger.d(Variables.TAG, "No current user found")
+                    AppLogger.d(Variables.TAG, "AccountVM: No current user found")
                     _state.value = _state.value.copy(
                         account = null,
                         isLoading = false
@@ -39,10 +39,16 @@ class AccountViewModel(
         }
     }
 
-    private suspend fun loadAccountFromLocal(email: String) {
-        when (val result = ecellRepository.loadAccountLocally(email)) {
+    /**
+     * Loads account using the repository's local-first strategy
+     * This automatically checks local cache first, then falls back to remote if needed
+     * Runs in background (viewModelScope) without blocking UI
+     */
+    private suspend fun loadAccount(email: String) {
+        AppLogger.d(Variables.TAG, "AccountVM: Loading account for: $email")
+        when (val result = ecellRepository.loadAccount(email)) {
             is Result.Success -> {
-                AppLogger.d(Variables.TAG, "Account loaded successfully from local: ${result.data.name}")
+                AppLogger.d(Variables.TAG, "AccountVM: Account loaded successfully: ${result.data.name}")
                 _state.value = _state.value.copy(
                     account = result.data,
                     isLoading = false
@@ -50,32 +56,14 @@ class AccountViewModel(
             }
 
             is Result.Error -> {
-                AppLogger.e(Variables.TAG, "Failed to load account from local: ${result.error}, trying remote...")
-                // Fallback: Try loading from remote if local fails
-//                loadAccountFromRemote(email)
+                AppLogger.e(Variables.TAG, "AccountVM: Failed to load account: ${result.error}")
+                _state.value = _state.value.copy(
+                    account = null,
+                    isLoading = false
+                )
             }
         }
     }
-
-//    private suspend fun loadAccountFromRemote(email: String) {
-//        when (val result = ecellRepository.loadAccountRemotely(email)) {
-//            is Result.Success -> {
-//                AppLogger.d(Variables.TAG, "Account loaded successfully from remote: ${result.data.name}")
-//                _state.value = _state.value.copy(
-//                    account = result.data,
-//                    isLoading = false
-//                )
-//            }
-//
-//            is Result.Error -> {
-//                AppLogger.e(Variables.TAG, "Failed to load account from remote: ${result.error}")
-//                _state.value = _state.value.copy(
-//                    account = null,
-//                    isLoading = false
-//                )
-//            }
-//        }
-//    }
 
     fun onAction(action: AccountAction) {
         when (action) {

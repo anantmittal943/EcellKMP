@@ -3,6 +3,10 @@ package com.anantmittal.ecellkmp.presentation.login_screen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anantmittal.ecellkmp.domain.repository.EcellRepository
+import com.anantmittal.ecellkmp.utility.domain.AppLogger
+import com.anantmittal.ecellkmp.utility.domain.Result
+import com.anantmittal.ecellkmp.utility.domain.Variables
+import com.anantmittal.ecellkmp.utility.presentation.UiText
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -87,7 +91,31 @@ class LoginViewModel(
                 validateForm(currentState)
                 if (_state.value.isLoginButtonEnabled) {
                     viewModelScope.launch {
-                        ecellRepository.login(action.loginModel)
+                        AppLogger.d(Variables.TAG, "LoginVM: Starting login process")
+                        _state.update { it.copy(isLoading = true, errorMessage = null) }
+
+                        when (val result = ecellRepository.login(action.loginModel)) {
+                            is Result.Success -> {
+                                AppLogger.d(Variables.TAG, "LoginVM: Login successful for ${result.data.name}")
+                                _state.update {
+                                    it.copy(
+                                        isLoading = false,
+                                        errorMessage = null
+                                    )
+                                }
+                                // Navigation will happen in the UI layer based on success
+                            }
+
+                            is Result.Error -> {
+                                AppLogger.e(Variables.TAG, "LoginVM: Login failed: ${result.error}")
+                                _state.update {
+                                    it.copy(
+                                        isLoading = false,
+                                        errorMessage = UiText.DynamicString("Login failed. Please check your credentials.")
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -18,8 +18,10 @@ import com.anantmittal.ecellkmp.utility.domain.DataError
 import com.anantmittal.ecellkmp.utility.domain.EmptyResult
 import com.anantmittal.ecellkmp.utility.domain.Result
 import com.anantmittal.ecellkmp.utility.domain.Variables
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
 class DefaultEcellRepository(
     private val ecellAuthSource: EcellAuthSource,
@@ -31,65 +33,109 @@ class DefaultEcellRepository(
 
     override suspend fun login(loginModel: LoginModel): Result<AccountModel, DataError.Remote> {
         AppLogger.d(Variables.TAG, "Starting login for email: ${loginModel.email}")
-        return when (val authResult = ecellAuthSource.login(loginModel)) {
-            is Result.Success -> {
-                AppLogger.d(Variables.TAG, "Login auth successful, loading account remotely...")
-                when (val accountResult = loadAccountRemotely(loginModel.email)) {
-                    is Result.Success -> {
-                        AppLogger.d(Variables.TAG, "Login completed successfully for: ${accountResult.data.name}")
-                        Result.Success(accountResult.data)
-                    }
 
-                    is Result.Error -> {
-                        AppLogger.e(Variables.TAG, "Login auth succeeded but failed to load account: ${accountResult.error}")
-                        Result.Error(accountResult.error)
+        // Use NonCancellable to prevent job cancellation during critical account loading
+        return withContext(NonCancellable) {
+            when (val authResult = ecellAuthSource.login(loginModel)) {
+                is Result.Success -> {
+                    AppLogger.d(Variables.TAG, "Login auth successful, loading account...")
+                    when (val accountResult = loadAccount(loginModel.email)) {
+                        is Result.Success -> {
+                            AppLogger.d(Variables.TAG, "Login completed successfully for: ${accountResult.data.name}")
+                            Result.Success(accountResult.data)
+                        }
+
+                        is Result.Error -> {
+                            AppLogger.e(Variables.TAG, "Login auth succeeded but failed to load account: ${accountResult.error}")
+                            Result.Error(accountResult.error)
+                        }
                     }
                 }
-            }
 
-            is Result.Error -> {
-                AppLogger.e(Variables.TAG, "Login authentication failed: ${authResult.error}")
-                Result.Error(authResult.error)
+                is Result.Error -> {
+                    AppLogger.e(Variables.TAG, "Login authentication failed: ${authResult.error}")
+                    Result.Error(authResult.error)
+                }
             }
         }
     }
 
     override suspend fun signup(signupModel: SignupModel): Result<AccountModel, DataError.Remote> {
         AppLogger.d(Variables.TAG, "Starting signup for email: ${signupModel.email}, name: ${signupModel.name}")
-        return when (val authResult = ecellAuthSource.signup(signupModel)) {
-            is Result.Success -> {
-                AppLogger.d(Variables.TAG, "Signup auth successful, getting current user...")
-                val user = currentUser.first()
-                val uid = user?.uid
-                AppLogger.d(Variables.TAG, "Current user UID: $uid")
-                val accountToCreate = signupModel.toAccountModel(uid ?: "error_uid_not_found")
 
-                when (val createResult = createAccountDbRemotely(accountToCreate)) {
-                    is Result.Success -> {
-                        AppLogger.d(Variables.TAG, "Account DB created remotely, loading account...")
-                        when (val loadResult = loadAccountRemotely(signupModel.email)) {
-                            is Result.Success -> {
-                                AppLogger.d(Variables.TAG, "Signup completed successfully for: ${loadResult.data.name}")
-                                Result.Success(loadResult.data)
-                            }
+        // Use NonCancellable to prevent job cancellation during critical account creation
+        return withContext(NonCancellable) {
+            when (val authResult = ecellAuthSource.signup(signupModel)) {
+                is Result.Success -> {
+                    AppLogger.d(Variables.TAG, "Signup auth successful, getting current user...")
+                    val user = currentUser.first()
+                    val uid = user?.uid
+                    AppLogger.d(Variables.TAG, "Current user UID: $uid")
+                    val accountToCreate = signupModel.toAccountModel(uid ?: "error_uid_not_found")
 
-                            is Result.Error -> {
-                                AppLogger.e(Variables.TAG, "Signup succeeded but failed to load account: ${loadResult.error}")
-                                Result.Error(loadResult.error)
+                    when (val createResult = createAccountDbRemotely(accountToCreate)) {
+                        is Result.Success -> {
+                            AppLogger.d(Variables.TAG, "Account DB created remotely, loading account...")
+                            when (val loadResult = loadAccount(signupModel.email)) {
+                                is Result.Success -> {
+                                    AppLogger.d(Variables.TAG, "Signup completed successfully for: ${loadResult.data.name}")
+                                    Result.Success(loadResult.data)
+                                }
+
+                                is Result.Error -> {
+                                    AppLogger.e(Variables.TAG, "Signup succeeded but failed to load account: ${loadResult.error}")
+                                    Result.Error(loadResult.error)
+                                }
                             }
                         }
-                    }
 
-                    is Result.Error -> {
-                        AppLogger.e(Variables.TAG, "Signup succeeded but failed to create account DB: ${createResult.error}")
-                        Result.Error(createResult.error)
+                        is Result.Error -> {
+                            AppLogger.e(Variables.TAG, "Signup succeeded but failed to create account DB: ${createResult.error}")
+                            Result.Error(createResult.error)
+                        }
                     }
                 }
+
+                is Result.Error -> {
+                    AppLogger.e(Variables.TAG, "Signup authentication failed: ${authResult.error}")
+                    Result.Error(authResult.error)
+                }
+            }
+        }
+    }
+
+    /**
+     * Loads account with local-first strategy:
+     * 1. Try to load from local cache
+     * 2. If not found, load from remote and cache it
+     * 3. Return the account data
+     * This runs in background without blocking UI
+     */
+    override suspend fun loadAccount(email: String): Result<AccountModel, DataError.Remote> {
+        AppLogger.d(Variables.TAG, "loadAccount: Starting for email: $email")
+
+        // Step 1: Try local cache first
+        when (val localResult = loadAccountLocally(email)) {
+            is Result.Success -> {
+                AppLogger.d(Variables.TAG, "loadAccount: Found in local cache: ${localResult.data.name}")
+                return Result.Success(localResult.data)
             }
 
             is Result.Error -> {
-                AppLogger.e(Variables.TAG, "Signup authentication failed: ${authResult.error}")
-                Result.Error(authResult.error)
+                AppLogger.d(Variables.TAG, "loadAccount: Not in local cache (${localResult.error}), fetching from remote...")
+            }
+        }
+
+        // Step 2: Local not found, fetch from remote
+        when (val remoteResult = loadAccountRemotely(email)) {
+            is Result.Success -> {
+                AppLogger.d(Variables.TAG, "loadAccount: Successfully loaded and cached from remote")
+                return Result.Success(remoteResult.data)
+            }
+
+            is Result.Error -> {
+                AppLogger.e(Variables.TAG, "loadAccount: Failed to load from remote: ${remoteResult.error}")
+                return Result.Error(remoteResult.error)
             }
         }
     }

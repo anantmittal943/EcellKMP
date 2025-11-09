@@ -3,6 +3,10 @@ package com.anantmittal.ecellkmp.presentation.signup_screen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anantmittal.ecellkmp.domain.repository.EcellRepository
+import com.anantmittal.ecellkmp.utility.domain.AppLogger
+import com.anantmittal.ecellkmp.utility.domain.Result
+import com.anantmittal.ecellkmp.utility.domain.Variables
+import com.anantmittal.ecellkmp.utility.presentation.UiText
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -120,7 +124,31 @@ class SignupViewModel(
                 validateForm(currentState)
                 if (_state.value.isSignupButtonEnabled) {
                     viewModelScope.launch {
-                        ecellRepository.signup(action.signupModel)
+                        AppLogger.d(Variables.TAG, "SignupVM: Starting signup process")
+                        _state.update { it.copy(isLoading = true, errorMessage = null) }
+
+                        when (val result = ecellRepository.signup(action.signupModel)) {
+                            is Result.Success -> {
+                                AppLogger.d(Variables.TAG, "SignupVM: Signup successful for ${result.data.name}")
+                                _state.update {
+                                    it.copy(
+                                        isLoading = false,
+                                        errorMessage = null
+                                    )
+                                }
+                                // Navigation will happen in the UI layer based on success
+                            }
+
+                            is Result.Error -> {
+                                AppLogger.e(Variables.TAG, "SignupVM: Signup failed: ${result.error}")
+                                _state.update {
+                                    it.copy(
+                                        isLoading = false,
+                                        errorMessage = UiText.DynamicString("Signup failed. Please try again.")
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

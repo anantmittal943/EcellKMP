@@ -10,5 +10,5 @@ data class EcellAccountsEntity(
     val email: String,
     val password: String,
     val kietLibId: String = "",
-    val phoneNumber: Int? = null
+    val phoneNumber: String = ""
 )

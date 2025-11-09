@@ -9,7 +9,7 @@ data class AccountModel(
     val password: String,
     val kietLibId: String,
     val branch: String = "",
-    val phoneNumber: Int? = null,
+    val phoneNumber: String = "",
     val profilePic: String = "",
     val accessType: String = "",
     val accountType: String = "",

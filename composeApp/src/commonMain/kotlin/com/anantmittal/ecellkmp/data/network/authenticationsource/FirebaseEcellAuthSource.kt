@@ -67,23 +67,33 @@ class FirebaseEcellAuthSource(
             val kietLibIdQuery = firebaseFirestore.collection(Variables.TEAM_MEMBERS_TAG).where { "library_id" equalTo accountDTO.library_id }.get()
             AppLogger.d(Variables.TAG, "Firestore: Library ID query returned ${kietLibIdQuery.documents.size} documents")
 
-            if (emailQuery.documents.isNotEmpty()) {
-                AppLogger.e(Variables.TAG, "Firestore: Email already exists in database: ${accountDTO.email}")
-                Result.Error(DataError.Remote.UNKNOWN)
-            } else if (kietLibIdQuery.documents.isNotEmpty()) {
-                AppLogger.e(Variables.TAG, "Firestore: Library ID already exists in database: ${accountDTO.library_id}")
-                Result.Error(DataError.Remote.UNKNOWN)
-            } else {
-                val docName = accountDTO.name.replace(" ", "_") + "_" + accountDTO.id
-                AppLogger.d(Variables.TAG, "Firestore: Creating document with name: $docName")
-                firebaseFirestore.collection(Variables.TEAM_MEMBERS_TAG).document(docName).set(accountDTO)
-                AppLogger.d(Variables.TAG, "Firestore: Account DB created successfully for: ${accountDTO.email}")
-                Result.Success(Unit)
+            when {
+                emailQuery.documents.isNotEmpty() -> {
+                    AppLogger.e(Variables.TAG, "Firestore: Email already exists in database: ${accountDTO.email}")
+                    return Result.Error(DataError.Remote.UNKNOWN)
+                }
+
+                kietLibIdQuery.documents.isNotEmpty() -> {
+                    AppLogger.e(Variables.TAG, "Firestore: Library ID already exists in database: ${accountDTO.library_id}")
+                    return Result.Error(DataError.Remote.UNKNOWN)
+                }
+
+                else -> {
+                    val docName = accountDTO.name.replace(" ", "_") + "_" + accountDTO.id
+                    AppLogger.d(Variables.TAG, "Firestore: Creating document with name: $docName")
+                    firebaseFirestore.collection(Variables.TEAM_MEMBERS_TAG).document(docName).set(accountDTO)
+                    AppLogger.d(Variables.TAG, "Firestore: Account DB created successfully for: ${accountDTO.email}")
+                    return Result.Success(Unit)
+                }
             }
         } catch (e: FirebaseFirestoreException) {
             e.printStackTrace()
-            AppLogger.e(Variables.TAG, "Firestore: Error creating account DB for ${accountDTO.email}: ${e.message}")
-            Result.Error(DataError.Remote.UNKNOWN)
+            AppLogger.e(Variables.TAG, "Firestore: FirebaseFirestoreException creating account DB for ${accountDTO.email}: ${e.message}")
+            return Result.Error(DataError.Remote.UNKNOWN)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            AppLogger.e(Variables.TAG, "Firestore: Exception creating account DB for ${accountDTO.email}: ${e.message}")
+            return Result.Error(DataError.Remote.UNKNOWN)
         }
     }
 
