@@ -154,12 +154,16 @@ fun App(
                                 }
                                 HomeScreenRoot(
                                     viewModel = viewModel,
-                                    onTeamMemberClick = {}
+                                    onTeamMemberClick = { profile ->
+                                        teamSharedViewModel.selectMember((profile))
+                                        navController.navigate(Route.ViewProfile)
+                                    }
 
                                 )
                             }
                             composable<Route.Account> {
                                 val viewModel = koinViewModel<AccountViewModel>()
+                                val teamSharedViewModel = it.sharedKoinViewModel<TeamSharedViewModel>(navController)
                                 AccountScreenRoot(
                                     viewModel = viewModel
                                 )
