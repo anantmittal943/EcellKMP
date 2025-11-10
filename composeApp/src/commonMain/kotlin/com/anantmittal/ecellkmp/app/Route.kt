@@ -41,6 +41,6 @@ sealed interface Route {
     data object Account : Route
 
     @Serializable
-    data object ViewProfile : Route
+    data class TeamDetail(val email: String) : Route
 
 }

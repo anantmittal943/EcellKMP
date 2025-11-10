@@ -35,6 +35,8 @@ import com.anantmittal.ecellkmp.presentation.login_screen.LoginViewModel
 import com.anantmittal.ecellkmp.presentation.signup_screen.SignupScreenRoot
 import com.anantmittal.ecellkmp.presentation.signup_screen.SignupViewModel
 import com.anantmittal.ecellkmp.presentation.splash_screen.SplashScreen
+import com.anantmittal.ecellkmp.presentation.team_detail_screen.TeamDetailScreenRoot
+import com.anantmittal.ecellkmp.presentation.team_detail_screen.TeamDetailViewModel
 import com.anantmittal.ecellkmp.presentation.team_shared.TeamSharedViewModel
 import com.anantmittal.ecellkmp.utility.presentation.animations.CrossFadeTransition
 import kotlinx.coroutines.delay
@@ -156,20 +158,25 @@ fun App(
                                     viewModel = viewModel,
                                     onTeamMemberClick = { profile ->
                                         teamSharedViewModel.selectMember((profile))
-                                        navController.navigate(Route.ViewProfile)
+                                        navController.navigate(Route.TeamDetail(profile.email))
                                     }
 
                                 )
                             }
                             composable<Route.Account> {
                                 val viewModel = koinViewModel<AccountViewModel>()
-                                val teamSharedViewModel = it.sharedKoinViewModel<TeamSharedViewModel>(navController)
                                 AccountScreenRoot(
                                     viewModel = viewModel
                                 )
                             }
-                            composable<Route.ViewProfile> {
-
+                            composable<Route.TeamDetail> {
+                                val viewModel = koinViewModel<TeamDetailViewModel>()
+                                TeamDetailScreenRoot(
+                                    viewModel = viewModel,
+                                    onBackClick = {
+                                        navController.navigateUp()
+                                    }
+                                )
                             }
                         }
                         // Authenticated Team Navigation Graph
@@ -190,7 +197,7 @@ fun App(
                                 )
                             }
                             composable<Route.Meetings> {}
-                            composable<Route.Meetings> {}
+                            composable<Route.TeamDetail> {}
                             composable<Route.CreateMeeting> {}
                         }
                     }

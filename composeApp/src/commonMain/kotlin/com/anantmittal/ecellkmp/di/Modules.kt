@@ -13,8 +13,8 @@ import com.anantmittal.ecellkmp.presentation.account_screen.AccountViewModel
 import com.anantmittal.ecellkmp.presentation.home_screen.HomeViewModel
 import com.anantmittal.ecellkmp.presentation.login_screen.LoginViewModel
 import com.anantmittal.ecellkmp.presentation.signup_screen.SignupViewModel
+import com.anantmittal.ecellkmp.presentation.team_detail_screen.TeamDetailViewModel
 import com.anantmittal.ecellkmp.presentation.team_shared.TeamSharedViewModel
-import com.anantmittal.ecellkmp.presentation.view_profile_screen.ViewProfileViewModel
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
 import dev.gitlive.firebase.firestore.firestore
@@ -45,6 +45,6 @@ val sharedModule = module {
     viewModelOf(::SignupViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::AccountViewModel)
-    viewModelOf(::ViewProfileViewModel)
     viewModelOf(::TeamSharedViewModel)
+    viewModelOf(::TeamDetailViewModel)
 }

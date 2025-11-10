@@ -43,7 +43,7 @@ fun HomeScreenRoot(
         onAction = { action ->
             when (action) {
                 is HomeAction.OnTeamMemberClick -> {
-                    action.profile
+                    onTeamMemberClick(action.profile)
                 }
 
                 else -> Unit
