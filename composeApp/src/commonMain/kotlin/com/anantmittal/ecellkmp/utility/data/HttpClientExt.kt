@@ -1,7 +1,7 @@
 package com.anantmittal.ecellkmp.utility.data
 
-import com.anantmittal.ecellkmp.utility.domain.Result
 import com.anantmittal.ecellkmp.utility.domain.DataError
+import com.anantmittal.ecellkmp.utility.domain.Result
 import io.ktor.client.call.NoTransformationFoundException
 import io.ktor.client.call.body
 import io.ktor.client.network.sockets.SocketTimeoutException
@@ -15,11 +15,11 @@ suspend inline fun <reified T> safeCall(
 ): Result<T, DataError.Remote> {
     val response = try {
         execute()
-    } catch(e: SocketTimeoutException) {
+    } catch (_: SocketTimeoutException) {
         return Result.Error(DataError.Remote.REQUEST_TIMEOUT)
-    } catch(e: UnresolvedAddressException) {
+    } catch (_: UnresolvedAddressException) {
         return Result.Error(DataError.Remote.NO_INTERNET)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         coroutineContext.ensureActive()
         return Result.Error(DataError.Remote.UNKNOWN)
     }
@@ -34,13 +34,18 @@ suspend inline fun <reified T> responseToResult(
         in 200..299 -> {
             try {
                 Result.Success(response.body<T>())
-            } catch(e: NoTransformationFoundException) {
-                Result.Error(DataError.Remote.SERIALIZATION)
+            } catch (_: NoTransformationFoundException) {
+                Result.Error(DataError.Remote.SERIALIZATION_ERROR)
             }
         }
+
+        401 -> Result.Error(DataError.Remote.UNAUTHORIZED)
+        403 -> Result.Error(DataError.Remote.FORBIDDEN)
+        404 -> Result.Error(DataError.Remote.DOCUMENT_NOT_FOUND)
         408 -> Result.Error(DataError.Remote.REQUEST_TIMEOUT)
         429 -> Result.Error(DataError.Remote.TOO_MANY_REQUESTS)
-        in 500..599 -> Result.Error(DataError.Remote.SERVER)
+        in 400..499 -> Result.Error(DataError.Remote.CLIENT_ERROR)
+        in 500..599 -> Result.Error(DataError.Remote.SERVER_ERROR)
         else -> Result.Error(DataError.Remote.UNKNOWN)
     }
 }
