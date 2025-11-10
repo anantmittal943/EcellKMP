@@ -69,7 +69,20 @@ class AccountViewModel(
 
             is AccountAction.OnLogoutClick -> {
                 AppLogger.d(Variables.TAG, "Logout clicked")
-                // TODO: Implement logout logic
+                viewModelScope.launch {
+                    val email = _state.value.account?.email
+                    if (email != null) {
+                        AppLogger.d(Variables.TAG, "Logging out user: $email")
+                        ecellRepository.logout(email)
+                        _state.value = _state.value.copy(
+                            account = null,
+                            isLoading = false
+                        )
+                        AppLogger.d(Variables.TAG, "Logout completed")
+                    } else {
+                        AppLogger.e(Variables.TAG, "Cannot logout: No account email found")
+                    }
+                }
             }
 
             is AccountAction.OnSocialLinkClick -> {

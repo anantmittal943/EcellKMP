@@ -22,5 +22,5 @@ interface EcellRepository {
     suspend fun loadDomainsLocally(): Result<List<DomainModel>, DataError.Local>
     suspend fun loadTeamAccountsRemotely(): Result<List<AccountModel>, DataError.Remote>
     suspend fun editDetails(accountModel: AccountModel): EmptyResult<DataError.Local>
-    suspend fun logout(uid: String)
+    suspend fun logout(email: String)
 }

@@ -19,6 +19,6 @@ interface EcellAccountsDao {
     @Query("SELECT * FROM EcellAccountsEntity WHERE email = :email")
     suspend fun getAccountById(email: String): EcellAccountsEntity?
 
-    @Query("DELETE FROM EcellAccountsEntity WHERE id = :uid")
-    suspend fun logout(uid: String) // TODO: change uid
+    @Query("DELETE FROM EcellAccountsEntity WHERE email = :email")
+    suspend fun logout(email: String)
 }

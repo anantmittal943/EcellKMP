@@ -258,8 +258,8 @@ class DefaultEcellRepository(
         }
     }
 
-    override suspend fun logout(uid: String) {
-        ecellAccountsDao.logout(uid)
+    override suspend fun logout(email: String) {
+        ecellAccountsDao.logout(email)
         ecellAuthSource.signOut()
     }
 }
