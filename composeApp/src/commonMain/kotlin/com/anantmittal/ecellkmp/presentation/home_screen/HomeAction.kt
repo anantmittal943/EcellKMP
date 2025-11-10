@@ -7,6 +7,6 @@ import com.anantmittal.ecellkmp.domain.models.EventsGlimpsesModel
 sealed interface HomeAction {
     data class OnEventGlimpseClick(val eventsGlimpsesModel: EventsGlimpsesModel) : HomeAction
     data class OnDomainClick(val domainModel: DomainModel) : HomeAction
-    data class OnTeamMemberClick(val accountModel: AccountModel) : HomeAction
+    data class OnTeamMemberClick(val profile: AccountModel) : HomeAction
     data object OnViewAllTeamMembersClick : HomeAction
 }

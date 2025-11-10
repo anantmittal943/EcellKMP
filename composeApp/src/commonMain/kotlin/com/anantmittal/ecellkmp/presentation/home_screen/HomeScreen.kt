@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.anantmittal.ecellkmp.domain.models.AccountModel
 import com.anantmittal.ecellkmp.presentation.home_screen.components.EventGlimpseBanner
 import com.anantmittal.ecellkmp.presentation.home_screen.components.TeamMembersList
 import com.anantmittal.ecellkmp.utility.presentation.ColorAccentDark
@@ -33,12 +34,22 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HomeScreenRoot(
-    viewModel: HomeViewModel = koinViewModel()
+    viewModel: HomeViewModel = koinViewModel(),
+    onTeamMemberClick: (AccountModel) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     HomeScreen(
         state = state,
-        onAction = { action -> viewModel.onAction(action) }
+        onAction = { action ->
+            when (action) {
+                is HomeAction.OnTeamMemberClick -> {
+                    action.profile
+                }
+
+                else -> Unit
+            }
+            viewModel.onAction(action)
+        }
     )
 }
 
@@ -62,18 +73,18 @@ private fun HomeScreen(
                 .verticalScroll(scrollState)
                 .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
-        Text(
-            text = "Ecell",
-            textAlign = TextAlign.Center,
-            color = White,
-            fontSize = 42.sp,
-            fontFamily = FontFamily(Font(Res.font.overlockreg))
-        )
-        Spacer(Modifier.height(14.dp))
+            Text(
+                text = "Ecell",
+                textAlign = TextAlign.Center,
+                color = White,
+                fontSize = 42.sp,
+                fontFamily = FontFamily(Font(Res.font.overlockreg))
+            )
+            Spacer(Modifier.height(14.dp))
 
-        EventGlimpseBanner(
-            modifier = Modifier
-        )
+            EventGlimpseBanner(
+                modifier = Modifier
+            )
 
 //        Spacer(Modifier.height(14.dp))
 
@@ -81,26 +92,26 @@ private fun HomeScreen(
 //            modifier = Modifier
 //        )
 
-        Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(14.dp))
 
-        // Team Members Section
-        if (state.teamMembers.isNotEmpty()) {
-            TeamMembersList(
-                teamMembers = state.teamMembers,
-                onTeamMemberClick = { accountModel ->
-                    onAction(HomeAction.OnTeamMemberClick(accountModel))
-                },
-                onViewAllClick = {
-                    onAction(HomeAction.OnViewAllTeamMembersClick)
-                },
-                modifier = Modifier,
-                showViewAllButton = true,
-                itemsToShow = 6 // Show only 6 items initially
-            )
+            // Team Members Section
+            if (state.teamMembers.isNotEmpty()) {
+                TeamMembersList(
+                    teamMembers = state.teamMembers,
+                    onTeamMemberClick = { accountModel ->
+                        onAction(HomeAction.OnTeamMemberClick(accountModel))
+                    },
+                    onViewAllClick = {
+                        onAction(HomeAction.OnViewAllTeamMembersClick)
+                    },
+                    modifier = Modifier,
+                    showViewAllButton = true,
+                    itemsToShow = 6 // Show only 6 items initially
+                )
+            }
+
+            Spacer(Modifier.height(20.dp))
         }
-
-        Spacer(Modifier.height(20.dp))
-    }
 
         if (state.isLoading) {
             LoadingIndicator()

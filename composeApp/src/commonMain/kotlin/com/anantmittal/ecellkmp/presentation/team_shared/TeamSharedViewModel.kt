@@ -18,8 +18,8 @@ class TeamSharedViewModel(
     private val _state = MutableStateFlow(TeamSharedState())
     val state = _state.asStateFlow()
 
-    fun selectMember(member: AccountModel) {
-        AppLogger.d(Variables.TAG, "Member selected: ${member.name}")
+    fun selectMember(member: AccountModel?) {
+        AppLogger.d(Variables.TAG, "Member selected: ${member?.name}")
         _state.update { it.copy(selectedMember = member) }
     }
 

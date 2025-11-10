@@ -23,7 +23,7 @@ class HomeViewModel : ViewModel() {
             }
 
             is HomeAction.OnTeamMemberClick -> {
-                AppLogger.d(Variables.TAG, "Team member clicked: ${action.accountModel.name}")
+                AppLogger.d(Variables.TAG, "Team member clicked: ${action.profile.name}")
                 // TODO: Navigate to team member profile
             }
 

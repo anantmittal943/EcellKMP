@@ -35,6 +35,7 @@ import com.anantmittal.ecellkmp.presentation.login_screen.LoginViewModel
 import com.anantmittal.ecellkmp.presentation.signup_screen.SignupScreenRoot
 import com.anantmittal.ecellkmp.presentation.signup_screen.SignupViewModel
 import com.anantmittal.ecellkmp.presentation.splash_screen.SplashScreen
+import com.anantmittal.ecellkmp.presentation.team_shared.TeamSharedViewModel
 import com.anantmittal.ecellkmp.utility.presentation.animations.CrossFadeTransition
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
@@ -136,7 +137,8 @@ fun App(
                             composable<Route.Home> {
                                 val viewModel = koinViewModel<HomeViewModel>()
                                 HomeScreenRoot(
-                                    viewModel = viewModel
+                                    viewModel = viewModel,
+                                    onTeamMemberClick = {}
                                 )
                             }
                         }
@@ -146,8 +148,14 @@ fun App(
                         ) {
                             composable<Route.Home> {
                                 val viewModel = koinViewModel<HomeViewModel>()
+                                val teamSharedViewModel = it.sharedKoinViewModel<TeamSharedViewModel>(navController)
+                                LaunchedEffect(true) {
+                                    teamSharedViewModel.selectMember(null)
+                                }
                                 HomeScreenRoot(
-                                    viewModel = viewModel
+                                    viewModel = viewModel,
+                                    onTeamMemberClick = {}
+
                                 )
                             }
                             composable<Route.Account> {
@@ -167,7 +175,8 @@ fun App(
                             composable<Route.Home> {
                                 val viewModel = koinViewModel<HomeViewModel>()
                                 HomeScreenRoot(
-                                    viewModel = viewModel
+                                    viewModel = viewModel,
+                                    onTeamMemberClick = {}
                                 )
                             }
                             composable<Route.Account> {
