@@ -40,4 +40,7 @@ sealed interface Route {
     @Serializable
     data object Account : Route
 
+    @Serializable
+    data object ViewProfile : Route
+
 }

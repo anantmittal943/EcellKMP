@@ -156,6 +156,9 @@ fun App(
                                     viewModel = viewModel
                                 )
                             }
+                            composable<Route.ViewProfile> {
+
+                            }
                         }
                         // Authenticated Team Navigation Graph
                         navigation<Route.TeamNavGraph>(
@@ -173,6 +176,7 @@ fun App(
                                     viewModel = viewModel
                                 )
                             }
+                            composable<Route.Meetings> {}
                             composable<Route.Meetings> {}
                             composable<Route.CreateMeeting> {}
                         }
