@@ -39,11 +39,6 @@ class AccountViewModel(
         }
     }
 
-    /**
-     * Loads account using the repository's local-first strategy
-     * This automatically checks local cache first, then falls back to remote if needed
-     * Runs in background (viewModelScope) without blocking UI
-     */
     private suspend fun loadAccount(email: String) {
         AppLogger.d(Variables.TAG, "AccountVM: Loading account for: $email")
         when (val result = ecellRepository.loadAccount(email)) {

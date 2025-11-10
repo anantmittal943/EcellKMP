@@ -16,7 +16,6 @@ interface EcellRepository {
     suspend fun login(loginModel: LoginModel): Result<AccountModel, DataError.Remote>
     suspend fun signup(signupModel: SignupModel): Result<AccountModel, DataError.Remote>
     suspend fun loadAccount(email: String): Result<AccountModel, DataError.Remote>
-    suspend fun loadAccountLocally(email: String): Result<AccountModel, DataError.Local>
     suspend fun loadEventsRemotely(): Result<List<EventsGlimpsesModel>, DataError.Remote>
     suspend fun loadEventsLocally(): Result<List<EventsGlimpsesModel>, DataError.Local>
     suspend fun loadDomainsRemotely(): Result<List<DomainModel>, DataError.Remote>

@@ -1,154 +1,552 @@
 # E-Cell KMP App
 
-This is a Kotlin Multiplatform project for the E-Cell App, targeting Android and iOS. The project follows Clean Architecture principles with industry-level implementation standards
-and aims for a high-quality, maintainable codebase.
+A production-ready Kotlin Multiplatform Mobile (KMM) application for the Entrepreneurship Cell (E-Cell) community, built with industry-standard architecture and best practices.
 
-## Project Overview
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.0-blue.svg)](https://kotlinlang.org)
+[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.6.0-brightgreen.svg)](https://www.jetbrains.com/lp/compose-multiplatform/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-The E-Cell KMP App is designed to provide a comprehensive platform for the Entrepreneurship Cell (E-Cell) community. It allows users to:
+## 📋 Table of Contents
 
-- Register and authenticate (with Firebase Auth)
-- View E-Cell events and glimpses
-- Explore different domains
-- Browse team members
-- Access team-specific features (for team members)
-- View meeting schedules (for team members)
+- [Project Overview](#project-overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Setup Instructions](#setup-instructions)
+- [Implementation Details](#implementation-details)
+- [Contributing](#contributing)
 
-## Tech Stack
+## 🎯 Project Overview
 
-### Core Technologies
+E-Cell KMP is a cross-platform mobile application designed to provide a comprehensive platform for the Entrepreneurship Cell community. Built using Kotlin Multiplatform, it shares
+business logic across Android and iOS while maintaining native UI experiences.
 
-- **Kotlin Multiplatform (KMP)**: Shared business logic across Android and iOS
-- **Compose Multiplatform**: UI framework for both platforms
-- **Kotlin Coroutines & Flow**: Asynchronous programming and reactive streams
+### Key Objectives
 
-### Architecture & Design Patterns
+- 📱 Cross-platform development (Android & iOS)
+- 🏗️ Industry-standard Clean Architecture
+- 🔄 Offline-first approach with local caching
+- 🔐 Secure authentication and data management
+- ⚡ High performance with reactive programming
+- 🎨 Modern UI with Jetpack Compose
 
-- **Clean Architecture**: Three-layer architecture (Data, Domain, Presentation)
-- **MVVM Pattern**: ViewModel + State management
-- **Repository Pattern**: Data abstraction layer
-- **Dependency Injection**: Koin for DI
-
-### Backend & Storage
-
-- **Firebase Authentication**: User authentication
-- **Firebase Firestore**: Cloud database
-- **Room Database**: Local caching (SQLite)
-
-### Navigation
-
-- **Compose Navigation**: Type-safe navigation with nested graphs
-
-## Project Structure
-
-The project is organized into the following main modules:
-
-```
-composeApp/
-├── src/
-│   ├── commonMain/          # Shared code for all platforms
-│   │   └── kotlin/com/anantmittal/ecellkmp/
-│   │       ├── app/         # Application setup and navigation
-│   │       ├── data/        # Data layer
-│   │       │   ├── database/      # Local database (Room)
-│   │       │   ├── dto/           # Data Transfer Objects
-│   │       │   ├── mappers/       # Data mappers
-│   │       │   ├── network/       # Network sources
-│   │       │   └── repository/    # Repository implementations
-│   │       ├── domain/      # Domain layer (Business logic)
-│   │       │   ├── models/        # Domain models
-│   │       │   └── repository/    # Repository interfaces
-│   │       ├── presentation/ # Presentation layer (UI)
-│   │       │   ├── bottom_navigation/
-│   │       │   ├── home_screen/
-│   │       │   │   ├── components/
-│   │       │   │   ├── HomeScreen.kt
-│   │       │   │   ├── HomeViewModel.kt
-│   │       │   │   ├── HomeState.kt
-│   │       │   │   └── HomeAction.kt
-│   │       │   ├── login_screen/
-│   │       │   ├── signup_screen/
-│   │       │   └── splash_screen/
-│   │       ├── di/          # Dependency Injection
-│   │       └── utility/     # Shared utilities
-│   │           ├── domain/        # Domain utilities
-│   │           └── presentation/  # UI utilities
-│   ├── androidMain/         # Android-specific code
-│   └── iosMain/            # iOS-specific code
-├── build.gradle.kts
-└── google-services.json
-```
-
-## Architecture and Rules
-
-This project follows a **Clean Architecture** pattern with strict layer separation:
-
-### Layer Structure
-
-1. **Presentation Layer** (`presentation/`)
-    - Contains UI components (Composables)
-    - ViewModels for state management
-    - UI State classes
-    - UI Action/Event classes
-    - Can only access: Domain layer
-
-2. **Domain Layer** (`domain/`)
-    - Contains business logic and use cases
-    - Domain models (pure Kotlin classes)
-    - Repository interfaces
-    - **Independent layer**: Cannot access Presentation or Data
-
-3. **Data Layer** (`data/`)
-    - Repository implementations
-    - Data sources (Remote & Local)
-    - Data Transfer Objects (DTOs)
-    - Mappers between DTOs and Domain models
-    - Can only access: Domain layer
-
-4. **Utility Layer** (`utility/`)
-    - Shared utilities and helpers
-    - **Accessible by all layers**
-
-### Key Principles
-
-- **Dependency Rule**: Dependencies point inward (Presentation → Domain ← Data)
-- **Interface Segregation**: Domain layer defines interfaces, Data layer implements them
-- **Single Responsibility**: Each class has one reason to change
-- **Type Safety**: Use sealed classes for actions, states, and results
-
-### Design Patterns Used
-
-1. **MVVM (Model-View-ViewModel)**
-   ```kotlin
-   Screen (View) ← State ← ViewModel ← Repository
-   Screen → Action → ViewModel
-   ```
-
-2. **Repository Pattern**
-   ```kotlin
-   ViewModel → Repository Interface (Domain)
-   Repository Implementation (Data) → Data Sources
-   ```
-
-3. **State Management**
-    - Unidirectional data flow
-    - Immutable state classes
-    - StateFlow for reactive updates
-
-4. **Result Wrapper Pattern**
-   ```kotlin
-   sealed interface Result<out D, out E>
-   data class Success<out D>(val data: D) : Result<D, Nothing>
-   data class Error<out E>(val error: E) : Result<Nothing, E>
-   ```
-
-## Features
+## ✨ Features
 
 ### Implemented Features
 
-- ✅ Firebase Authentication (Login/Signup)
-- ✅ User Profile Management
-- ✅ Local Database Caching (Room)
+- ✅ **Authentication System**
+    - Firebase Authentication (Email/Password)
+    - Secure signup and login flows
+    - Session management with automatic re-authentication
+    - Job-cancellation-safe operations with `NonCancellable` context
+
+- ✅ **User Profile Management**
+    - View and edit user profiles
+    - Account details with personal information
+    - Social links integration (LinkedIn, Instagram, Portfolio)
+    - Profile picture support
+
+- ✅ **Local Data Caching**
+    - Room Database integration for offline support
+    - Local-first data loading strategy
+    - Automatic background sync
+    - SQLite-based persistent storage
+
+- ✅ **Team Members Directory**
+    - Browse team members with staggered grid layout
+    - Filter by domain and position
+    - View detailed member profiles
+    - Click-to-view functionality
+
+- ✅ **Navigation System**
+    - Bottom navigation bar
+    - Type-safe Compose Navigation
+    - Nested navigation graphs
+    - Deep linking support
+
+- ✅ **Loading States & Error Handling**
+    - Material 3 loading indicators
+    - Comprehensive error messages
+    - Graceful failure handling
+    - User-friendly feedback
+
+### Upcoming Features
+
+- 🔄 Events and glimpses showcase
+- 🔄 Domain exploration
+- 🔄 Meeting schedules for team members
+- 🔄 Push notifications
+- 🔄 Real-time updates
+
+## 🛠️ Tech Stack
+
+### Core Technologies
+
+| Technology                | Purpose                                |
+|---------------------------|----------------------------------------|
+| **Kotlin Multiplatform**  | Shared business logic across platforms |
+| **Compose Multiplatform** | Declarative UI framework               |
+| **Kotlin Coroutines**     | Asynchronous programming               |
+| **Kotlin Flow**           | Reactive data streams                  |
+
+### Architecture & Patterns
+
+| Component                | Implementation                            |
+|--------------------------|-------------------------------------------|
+| **Architecture**         | Clean Architecture (3-layer)              |
+| **Presentation**         | MVVM with unidirectional data flow        |
+| **Dependency Injection** | Koin                                      |
+| **Navigation**           | Compose Navigation with type-safe routing |
+| **State Management**     | StateFlow + Immutable State classes       |
+
+### Backend & Database
+
+| Service                | Purpose                |
+|------------------------|------------------------|
+| **Firebase Auth**      | User authentication    |
+| **Firebase Firestore** | Cloud NoSQL database   |
+| **Room Database**      | Local SQLite caching   |
+| **Firebase Storage**   | Image and file storage |
+
+### UI/UX
+
+| Library                | Purpose                   |
+|------------------------|---------------------------|
+| **Material 3**         | Modern design system      |
+| **Coil**               | Image loading and caching |
+| **Compose Foundation** | Core UI components        |
+
+## 🏗️ Architecture
+
+This project implements **Clean Architecture** with strict layer separation and dependency rules.
+
+### Layer Structure
+
+```
+┌─────────────────────────────────────────────────────┐
+│                 Presentation Layer                   │
+│  • Composable screens & components                   │
+│  • ViewModels (state management)                     │
+│  • UI State & Action classes                         │
+│  • Can access: Domain layer only                     │
+└──────────────────┬──────────────────────────────────┘
+                   │
+                   ↓
+┌─────────────────────────────────────────────────────┐
+│                   Domain Layer                       │
+│  • Business logic & use cases                        │
+│  • Domain models (pure Kotlin)                       │
+│  • Repository interfaces                             │
+│  • Independent - no dependencies                     │
+└──────────────────┬──────────────────────────────────┘
+                   ↑
+                   │
+┌─────────────────────────────────────────────────────┐
+│                    Data Layer                        │
+│  • Repository implementations                        │
+│  • Data sources (Remote & Local)                     │
+│  • DTOs & Mappers                                    │
+│  • Can access: Domain layer only                     │
+└─────────────────────────────────────────────────────┘
+
+        ┌────────────────────────────┐
+        │      Utility Layer         │
+        │  Accessible by all layers  │
+        └────────────────────────────┘
+```
+
+### Architectural Rules
+
+#### ✅ Allowed Dependencies
+
+- **Presentation → Domain** ✅
+- **Data → Domain** ✅
+- **All Layers → Utility** ✅
+
+#### ❌ Forbidden Dependencies
+
+- **Domain → Presentation** ❌
+- **Domain → Data** ❌
+- **Presentation → Data** ❌
+
+### Design Patterns
+
+#### 1. MVVM Pattern
+
+```kotlin
+@Composable
+fun Screen(viewModel: ViewModel) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // UI renders based on state
+    when {
+        state.isLoading -> LoadingIndicator()
+        state.data != null -> DataDisplay(state.data)
+        state.error != null -> ErrorMessage(state.error)
+    }
+
+    // User actions sent to ViewModel
+    Button(onClick = { viewModel.onAction(Action.ButtonClicked) })
+}
+```
+
+#### 2. Repository Pattern
+
+```kotlin
+// Domain layer - Interface
+interface Repository {
+    suspend fun getData(): Result<Data, Error>
+}
+
+// Data layer - Implementation
+class RepositoryImpl(
+    private val remoteSource: RemoteSource,
+    private val localSource: LocalSource
+) : Repository {
+    override suspend fun getData(): Result<Data, Error> {
+        // Local-first strategy
+        return localSource.getData() ?: remoteSource.getData()
+    }
+}
+```
+
+#### 3. Result Wrapper Pattern
+
+```kotlin
+sealed interface Result<out D, out E : Error> {
+    data class Success<out D>(val data: D) : Result<D, Nothing>
+    data class Error<out E : Error>(val error: E) : Result<Nothing, E>
+}
+
+// Usage
+when (val result = repository.getData()) {
+    is Result.Success -> handleSuccess(result.data)
+    is Result.Error -> handleError(result.error)
+}
+```
+
+#### 4. State Management Pattern
+
+```kotlin
+data class ScreenState(
+    val data: List<Item> = emptyList(),
+    val isLoading: Boolean = false,
+    val errorMessage: UiText? = null
+)
+
+sealed interface ScreenAction {
+    data object LoadData : ScreenAction
+    data class ItemClicked(val id: String) : ScreenAction
+}
+```
+
+## 📁 Project Structure
+
+```
+EcellKMP/
+├── composeApp/
+│   ├── src/
+│   │   ├── commonMain/kotlin/com/anantmittal/ecellkmp/
+│   │   │   ├── app/                    # Application setup
+│   │   │   │   ├── App.kt              # Main app entry point
+│   │   │   │   └── navigation/         # Navigation graphs
+│   │   │   │
+│   │   │   ├── data/                   # Data Layer
+│   │   │   │   ├── database/           # Room database
+│   │   │   │   │   ├── EcellAccountsDao.kt
+│   │   │   │   │   ├── EcellAccountsEntity.kt
+│   │   │   │   │   └── EcellAccountsDatabase.kt
+│   │   │   │   ├── dto/                # Data Transfer Objects
+│   │   │   │   │   └── AccountDTO.kt
+│   │   │   │   ├── mappers/            # DTO ↔ Model mappers
+│   │   │   │   │   └── Mappers.kt
+│   │   │   │   ├── network/            # Network data sources
+│   │   │   │   │   └── authenticationsource/
+│   │   │   │   │       ├── EcellAuthSource.kt
+│   │   │   │   │       └── FirebaseEcellAuthSource.kt
+│   │   │   │   └── repository/         # Repository implementations
+│   │   │   │       └── DefaultEcellRepository.kt
+│   │   │   │
+│   │   │   ├── domain/                 # Domain Layer
+│   │   │   │   ├── models/             # Domain models
+│   │   │   │   │   ├── AccountModel.kt
+│   │   │   │   │   ├── User.kt
+│   │   │   │   │   ├── LoginModel.kt
+│   │   │   │   │   └── SignupModel.kt
+│   │   │   │   └── repository/         # Repository interfaces
+│   │   │   │       └── EcellRepository.kt
+│   │   │   │
+│   │   │   ├── presentation/           # Presentation Layer
+│   │   │   │   ├── splash_screen/
+│   │   │   │   │   └── SplashScreen.kt
+│   │   │   │   ├── login_screen/
+│   │   │   │   │   ├── LoginScreen.kt
+│   │   │   │   │   ├── LoginViewModel.kt
+│   │   │   │   │   ├── LoginState.kt
+│   │   │   │   │   ├── LoginAction.kt
+│   │   │   │   │   └── components/
+│   │   │   │   ├── signup_screen/
+│   │   │   │   │   ├── SignupScreen.kt
+│   │   │   │   │   ├── SignupViewModel.kt
+│   │   │   │   │   ├── SignupState.kt
+│   │   │   │   │   └── SignupAction.kt
+│   │   │   │   ├── home_screen/
+│   │   │   │   │   ├── HomeScreen.kt
+│   │   │   │   │   ├── HomeViewModel.kt
+│   │   │   │   │   ├── HomeState.kt
+│   │   │   │   │   ├── HomeAction.kt
+│   │   │   │   │   └── components/
+│   │   │   │   │       ├── EventGlimpseBanner.kt
+│   │   │   │   │       └── TeamMembersList.kt
+│   │   │   │   ├── account_screen/
+│   │   │   │   │   ├── AccountScreen.kt
+│   │   │   │   │   ├── AccountViewModel.kt
+│   │   │   │   │   ├── AccountState.kt
+│   │   │   │   │   ├── AccountAction.kt
+│   │   │   │   │   └── components/
+│   │   │   │   ├── meetings_screen/
+│   │   │   │   └── bottom_navigation/
+│   │   │   │       └── BottomNavigation.kt
+│   │   │   │
+│   │   │   ├── di/                     # Dependency Injection
+│   │   │   │   └── Modules.kt
+│   │   │   │
+│   │   │   └── utility/                # Utilities
+│   │   │       ├── domain/             # Domain utilities
+│   │   │       │   ├── AppLogger.kt
+│   │   │       │   ├── DataError.kt
+│   │   │       │   ├── Result.kt
+│   │   │       │   └── Variables.kt
+│   │   │       └── presentation/       # UI utilities
+│   │   │           ├── Colors.kt
+│   │   │           ├── UiText.kt
+│   │   │           └── components/
+│   │   │               └── LoadingIndicator.kt
+│   │   │
+│   │   ├── androidMain/                # Android-specific code
+│   │   │   └── kotlin/
+│   │   │       ├── MainActivity.kt
+│   │   │       └── App.android.kt
+│   │   │
+│   │   └── iosMain/                    # iOS-specific code
+│   │       └── kotlin/
+│   │           └── MainViewController.kt
+│   │
+│   ├── build.gradle.kts
+│   └── google-services.json
+│
+├── gradle/
+│   └── libs.versions.toml             # Centralized dependency versions
+├── build.gradle.kts
+├── settings.gradle.kts
+├── README.md
+└── RULES.md                            # Architecture rules and guidelines
+```
+
+## 🚀 Setup Instructions
+
+### Prerequisites
+
+- **JDK 17 or higher**
+- **Android Studio Hedgehog (2023.1.1) or newer**
+- **Xcode 15+ (for iOS development)**
+- **Kotlin 2.0.0+**
+- **Gradle 8.0+**
+
+### Firebase Setup
+
+1. **Create Firebase Project**
+    - Go to [Firebase Console](https://console.firebase.google.com/)
+    - Create a new project or use existing one
+
+2. **Add Android App**
+    - Package name: `com.anantmittal.ecellkmp`
+    - Download `google-services.json`
+    - Place in `composeApp/` directory
+
+3. **Add iOS App**
+    - Bundle ID: `com.anantmittal.ecellkmp`
+    - Download `GoogleService-Info.plist`
+    - Place in `iosApp/iosApp/` directory
+
+4. **Enable Authentication**
+    - Go to Firebase Console → Authentication
+    - Enable Email/Password sign-in method
+
+5. **Setup Firestore**
+    - Go to Firebase Console → Firestore Database
+    - Create database in production mode
+    - Create collection: `team_members`
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/EcellKMP.git
+   cd EcellKMP
+   ```
+
+2. **Open in Android Studio**
+    - Open the project in Android Studio
+    - Wait for Gradle sync to complete
+
+3. **Add Firebase configuration files**
+    - Place `google-services.json` in `composeApp/`
+    - Place `GoogleService-Info.plist` in `iosApp/iosApp/`
+
+4. **Build the project**
+   ```bash
+   ./gradlew build
+   ```
+
+### Running the App
+
+#### Android
+
+```bash
+./gradlew :composeApp:installDebug
+```
+
+Or use the "Run" button in Android Studio
+
+#### iOS
+
+```bash
+./gradlew :composeApp:iosSimulatorArm64Test
+```
+
+Or open `iosApp/iosApp.xcodeproj` in Xcode and run
+
+## 💡 Implementation Details
+
+### Local-First Data Loading Strategy
+
+The app implements a robust local-first data loading strategy for optimal performance:
+
+```kotlin
+suspend fun loadAccount(email: String): Result<AccountModel, DataError.Remote> {
+    // Step 1: Try local cache first (instant load)
+    when (val localResult = loadAccountLocally(email)) {
+        is Result.Success -> return Result.Success(localResult.data)
+        is Result.Error -> // Continue to remote
+    }
+
+    // Step 2: Fetch from remote and cache
+    when (val remoteResult = loadAccountRemotely(email)) {
+        is Result.Success -> {
+            cacheLocally(remoteResult.data)  // Cache for next time
+            return Result.Success(remoteResult.data)
+        }
+        is Result.Error -> return Result.Error(remoteResult.error)
+    }
+}
+```
+
+**Benefits:**
+
+- ⚡ Instant load from cache (subsequent opens)
+- 🔄 Automatic background sync
+- 📴 Offline support
+- 🎯 Reduced network calls
+
+### Job-Cancellation-Safe Operations
+
+Critical operations (signup, login) use `NonCancellable` context to prevent job cancellation:
+
+```kotlin
+override suspend fun signup(signupModel: SignupModel): Result<AccountModel, DataError.Remote> {
+    return withContext(NonCancellable) {
+        // Firebase auth signup
+        // Firestore account creation
+        // Local caching
+        // All operations complete even if screen navigates away
+    }
+}
+```
+
+**Why this matters:**
+
+- ✅ Prevents "Job was cancelled" errors
+- ✅ Ensures data integrity
+- ✅ Completes Firestore writes even during navigation
+- ✅ Reliable account creation
+
+### Comprehensive Logging
+
+All critical operations have detailed logging for debugging:
+
+```kotlin
+AppLogger.d(TAG, "Starting signup for email: ${email}")
+AppLogger.d(TAG, "Firestore: Query returned ${documents.size} documents")
+AppLogger.e(TAG, "Failed to load account: ${error}")
+```
+
+**Log levels:**
+
+- `d` - Debug information
+- `e` - Error conditions
+- All logs tagged with `Variables.TAG = "xyz"`
+
+### Material 3 Loading States
+
+Consistent loading indicators across the app:
+
+```kotlin
+Box(modifier = Modifier.fillMaxSize()) {
+    // Content
+    if (state.isLoading) {
+        LoadingIndicator()  // Centered Material 3 loader
+    }
+}
+```
+
+## 📝 Contributing
+
+### Development Guidelines
+
+1. **Follow Clean Architecture rules** (see `RULES.md`)
+2. **Use existing patterns** for consistency
+3. **Write comprehensive logging** for debugging
+4. **Handle all error cases** properly
+5. **Test on both platforms** before committing
+
+### Code Style
+
+- Follow Kotlin coding conventions
+- Use meaningful variable names
+- Add KDoc comments for public APIs
+- Keep functions small and focused
+
+### Commit Messages
+
+Use conventional commits format:
+
+```
+feat: add team member filtering
+fix: resolve job cancellation in signup
+docs: update README with setup instructions
+refactor: improve repository caching logic
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 👥 Team
+
+- **Anant Mittal** - Project Lead & Developer
+
+## 🙏 Acknowledgments
+
+- Kotlin Multiplatform team for the amazing framework
+- Firebase for backend services
+- Jetpack Compose team for the UI toolkit
+- E-Cell KIET for the opportunity
+
+---
+
+**Made with ❤️ using Kotlin Multiplatform**
 - ✅ Team Members Display
 - ✅ Bottom Navigation
 - ✅ Nested Navigation Graphs (Auth, Normal User, Team)

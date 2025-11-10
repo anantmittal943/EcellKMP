@@ -34,7 +34,6 @@ class DefaultEcellRepository(
     override suspend fun login(loginModel: LoginModel): Result<AccountModel, DataError.Remote> {
         AppLogger.d(Variables.TAG, "Starting login for email: ${loginModel.email}")
 
-        // Use NonCancellable to prevent job cancellation during critical account loading
         return withContext(NonCancellable) {
             when (val authResult = ecellAuthSource.login(loginModel)) {
                 is Result.Success -> {
@@ -63,7 +62,6 @@ class DefaultEcellRepository(
     override suspend fun signup(signupModel: SignupModel): Result<AccountModel, DataError.Remote> {
         AppLogger.d(Variables.TAG, "Starting signup for email: ${signupModel.email}, name: ${signupModel.name}")
 
-        // Use NonCancellable to prevent job cancellation during critical account creation
         return withContext(NonCancellable) {
             when (val authResult = ecellAuthSource.signup(signupModel)) {
                 is Result.Success -> {
@@ -104,17 +102,9 @@ class DefaultEcellRepository(
         }
     }
 
-    /**
-     * Loads account with local-first strategy:
-     * 1. Try to load from local cache
-     * 2. If not found, load from remote and cache it
-     * 3. Return the account data
-     * This runs in background without blocking UI
-     */
     override suspend fun loadAccount(email: String): Result<AccountModel, DataError.Remote> {
         AppLogger.d(Variables.TAG, "loadAccount: Starting for email: $email")
 
-        // Step 1: Try local cache first
         when (val localResult = loadAccountLocally(email)) {
             is Result.Success -> {
                 AppLogger.d(Variables.TAG, "loadAccount: Found in local cache: ${localResult.data.name}")
@@ -126,7 +116,6 @@ class DefaultEcellRepository(
             }
         }
 
-        // Step 2: Local not found, fetch from remote
         when (val remoteResult = loadAccountRemotely(email)) {
             is Result.Success -> {
                 AppLogger.d(Variables.TAG, "loadAccount: Successfully loaded and cached from remote")
@@ -202,7 +191,7 @@ class DefaultEcellRepository(
         }
     }
 
-    override suspend fun loadAccountLocally(email: String): Result<AccountModel, DataError.Local> {
+    private suspend fun loadAccountLocally(email: String): Result<AccountModel, DataError.Local> {
         return try {
             AppLogger.d(Variables.TAG, "Loading account locally for email: $email")
             val entity = ecellAccountsDao.getAccountById(email)
@@ -210,7 +199,7 @@ class DefaultEcellRepository(
 
             if (entity == null) {
                 AppLogger.e(Variables.TAG, "Account entity is NULL for email: $email")
-                Result.Error(DataError.Local.NULL)
+                Result.Error(DataError.Local.NULL_RESULT)
             } else {
                 val accountModel = entity.toAccountModel()
                 AppLogger.d(Variables.TAG, "Account loaded locally successfully: ${accountModel.email}, name: ${accountModel.name}")
@@ -223,7 +212,7 @@ class DefaultEcellRepository(
         } catch (e: NullPointerException) {
             e.printStackTrace()
             AppLogger.e(Variables.TAG, "NullPointerException in loadAccountLocally for $email: ${e.message}")
-            Result.Error(DataError.Local.NULL)
+            Result.Error(DataError.Local.NULL_RESULT)
         } catch (e: Exception) {
             e.printStackTrace()
             AppLogger.e(Variables.TAG, "Exception in loadAccountLocally for $email: ${e.message}")
