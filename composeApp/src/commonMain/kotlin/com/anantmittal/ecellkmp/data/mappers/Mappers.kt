@@ -17,7 +17,25 @@ fun AccountModel.toAccountEntity(): EcellAccountsEntity {
         email = email,
         password = password,
         kietLibId = kietLibId,
-        phoneNumber = phoneNumber
+        branch = branch,
+        phoneNumber = phoneNumber,
+        profilePic = profilePic,
+        accessType = accessType,
+        accountType = accountType,
+        portfolioUrl = portfolioUrl,
+        linkedinUrl = linkedinUrl,
+        instagramUrl = instagramUrl,
+        designation = designation,
+        status = status,
+        universityRollNumber = universityRollNumber,
+        kietEmail = kietEmail,
+        accommodationType = accommodationType,
+        city = city,
+        domain = domain,
+        year = year,
+        dob = dob.seconds,
+        shirtSize = shirtSize,
+        createdOn = createdOn.seconds
     )
 }
 
@@ -29,7 +47,25 @@ fun EcellAccountsEntity.toAccountModel(): AccountModel {
         email = email,
         password = password,
         kietLibId = kietLibId,
-        phoneNumber = phoneNumber
+        branch = branch,
+        phoneNumber = phoneNumber,
+        profilePic = profilePic,
+        accessType = accessType,
+        accountType = accountType,
+        portfolioUrl = portfolioUrl,
+        linkedinUrl = linkedinUrl,
+        instagramUrl = instagramUrl,
+        designation = designation,
+        status = status,
+        universityRollNumber = universityRollNumber,
+        kietEmail = kietEmail,
+        accommodationType = accommodationType,
+        city = city,
+        domain = domain,
+        year = year,
+        dob = dev.gitlive.firebase.firestore.Timestamp(dob, 0),
+        shirtSize = shirtSize,
+        createdOn = dev.gitlive.firebase.firestore.Timestamp(createdOn, 0)
     )
 }
 

@@ -6,7 +6,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [EcellAccountsEntity::class],
-    version = 1
+    version = 2
 )
 @ConstructedBy(EcellAccountsDatabaseConstructor::class)
 abstract class EcellAccountsDatabase : RoomDatabase() {

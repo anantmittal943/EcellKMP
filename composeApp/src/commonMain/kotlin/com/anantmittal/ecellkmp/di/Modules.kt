@@ -34,6 +34,7 @@ val sharedModule = module {
     single {
         get<DatabaseFactory>().create()
             .setDriver(BundledSQLiteDriver())
+            .fallbackToDestructiveMigration(true)
             .build()
     }
     single { get<EcellAccountsDatabase>().ecellAccountsDao }
