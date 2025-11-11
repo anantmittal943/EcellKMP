@@ -106,7 +106,7 @@ private fun HomeScreen(
                     },
                     modifier = Modifier,
                     showViewAllButton = true,
-                    itemsToShow = 6 // Show only 6 items initially
+                    itemsToShow = 6
                 )
             }
 

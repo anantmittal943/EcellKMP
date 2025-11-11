@@ -6,6 +6,7 @@ import com.anantmittal.ecellkmp.data.mappers.toAccountDTO
 import com.anantmittal.ecellkmp.data.mappers.toAccountEntity
 import com.anantmittal.ecellkmp.data.mappers.toAccountModel
 import com.anantmittal.ecellkmp.data.network.authenticationsource.EcellAuthSource
+import com.anantmittal.ecellkmp.data.network.datasource.RemoteEcellDataSource
 import com.anantmittal.ecellkmp.domain.models.AccountModel
 import com.anantmittal.ecellkmp.domain.models.DomainModel
 import com.anantmittal.ecellkmp.domain.models.EventsGlimpsesModel
@@ -25,6 +26,7 @@ import kotlinx.coroutines.withContext
 
 class DefaultEcellRepository(
     private val ecellAuthSource: EcellAuthSource,
+    private val remoteEcellDataSource: RemoteEcellDataSource,
     private val ecellAccountsDao: EcellAccountsDao
 ) : EcellRepository {
     override val currentUser: Flow<User?>
@@ -132,7 +134,7 @@ class DefaultEcellRepository(
     private suspend fun createAccountDbRemotely(accountModel: AccountModel): EmptyResult<DataError.Remote> {
         return try {
             AppLogger.d(Variables.TAG, "Creating account DB remotely for: ${accountModel.email}")
-            ecellAuthSource.createAccountDb(accountModel.toAccountDTO())
+            remoteEcellDataSource.createAccountDb(accountModel.toAccountDTO())
             AppLogger.d(Variables.TAG, "Account DB created successfully for: ${accountModel.email}")
             Result.Success(Unit)
         } catch (e: Exception) {
@@ -144,7 +146,7 @@ class DefaultEcellRepository(
 
     private suspend fun loadAccountRemotely(email: String): Result<AccountModel, DataError.Remote> {
         AppLogger.d(Variables.TAG, "Loading account remotely for email: $email")
-        return when (val result = ecellAuthSource.getAccountDb(email)) {
+        return when (val result = remoteEcellDataSource.getAccountDb(email)) {
             is Result.Success -> {
                 AppLogger.d(Variables.TAG, "Account DTO retrieved from remote: ${result.data}")
                 val accountModel = result.data.toAccountModel()
