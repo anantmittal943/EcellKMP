@@ -18,19 +18,23 @@ class TeamSharedViewModel(
     private val _state = MutableStateFlow(TeamSharedState())
     val state = _state.asStateFlow()
 
+    init {
+        loadFullTeamList()
+    }
+
     fun selectMember(member: AccountModel?) {
         AppLogger.d(AppConfig.TAG, "Member selected: ${member?.name}")
         _state.update { it.copy(selectedMember = member) }
     }
 
     fun loadFullTeamList() {
-        if (state.value.fullTeamList.isNotEmpty()) return
         AppLogger.d(AppConfig.TAG, "Loading full team list...")
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
             when (val result = ecellRepository.loadTeamAccountsRemotely()) {
                 is Result.Success -> {
+                    AppLogger.d(AppConfig.TAG, "Successfully loaded ${result.data.size} team members in SharedViewModel")
                     _state.update {
                         it.copy(
                             fullTeamList = result.data,
