@@ -82,6 +82,30 @@ class FirebaseRemoteEcellDataSource(
     }
 
     override suspend fun getTeamMembers(): Result<List<AccountDTO>, DataError.Remote> {
-        TODO("Not yet implemented")
+        return try {
+            AppLogger.d(AppConfig.TAG, "Firestore: Getting all team members")
+            val querySnapshot = firebaseFirestore.collection(AppConfig.FirebaseConfig.TEAM_MEMBERS_TAG).get()
+
+            AppLogger.d(AppConfig.TAG, "Firestore: Query returned ${querySnapshot.documents.size} team members")
+
+            if (querySnapshot.documents.isEmpty()) {
+                AppLogger.e(AppConfig.TAG, "Firestore: No team members found")
+                Result.Success(emptyList())
+            } else {
+                val teamMembers = querySnapshot.documents.map { document ->
+                    document.data<AccountDTO>()
+                }
+                AppLogger.d(AppConfig.TAG, "Firestore: Successfully retrieved ${teamMembers.size} team members")
+                Result.Success(teamMembers)
+            }
+        } catch (e: FirebaseFirestoreException) {
+            e.printStackTrace()
+            AppLogger.e(AppConfig.TAG, "Firestore: FirebaseFirestoreException getting team members: ${e.message}")
+            Result.Error(DataError.Remote.UNKNOWN)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            AppLogger.e(AppConfig.TAG, "Firestore: Unexpected error getting team members: ${e.message}")
+            Result.Error(DataError.Remote.UNKNOWN)
+        }
     }
 }

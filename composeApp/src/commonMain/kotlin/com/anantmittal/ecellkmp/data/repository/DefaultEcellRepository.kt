@@ -247,7 +247,20 @@ class DefaultEcellRepository(
     }
 
     override suspend fun loadTeamAccountsRemotely(): Result<List<AccountModel>, DataError.Remote> {
-        TODO("Not yet implemented")
+        AppLogger.d(AppConfig.TAG, "Loading team accounts remotely")
+        return when (val result = remoteEcellDataSource.getTeamMembers()) {
+            is Result.Success -> {
+                AppLogger.d(AppConfig.TAG, "Successfully retrieved ${result.data.size} team members from remote")
+                val teamAccountModels = result.data.map { it.toAccountModel() }
+                AppLogger.d(AppConfig.TAG, "Converted ${teamAccountModels.size} DTOs to AccountModels")
+                Result.Success(teamAccountModels)
+            }
+
+            is Result.Error -> {
+                AppLogger.e(AppConfig.TAG, "Failed to load team accounts remotely: ${result.error}")
+                Result.Error(result.error)
+            }
+        }
     }
 
     override suspend fun editDetails(accountModel: AccountModel): EmptyResult<DataError.Local> {
