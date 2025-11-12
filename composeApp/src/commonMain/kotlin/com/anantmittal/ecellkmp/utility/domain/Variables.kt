@@ -1,7 +1,7 @@
 package com.anantmittal.ecellkmp.utility.domain
 
 object Variables {
-    const val TAG = "xyz"
+//    const val TAG = "xyz"
 
     const val DAY_SCHOLAR_TAG: String = "DAY SCHOLAR"
     const val HOSTELER_TAG: String = "HOSTELER"

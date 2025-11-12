@@ -7,9 +7,9 @@ import androidx.navigation.toRoute
 import com.anantmittal.ecellkmp.app.Route
 import com.anantmittal.ecellkmp.domain.repository.EcellRepository
 import com.anantmittal.ecellkmp.presentation.team_shared.TeamSharedViewModel
+import com.anantmittal.ecellkmp.utility.domain.AppConfig
 import com.anantmittal.ecellkmp.utility.domain.AppLogger
 import com.anantmittal.ecellkmp.utility.domain.Result
-import com.anantmittal.ecellkmp.utility.domain.Variables
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -29,7 +29,7 @@ class TeamDetailViewModel(
     init {
         val args = savedStateHandle.toRoute<Route.TeamDetail>()
         memberId = args.email
-        AppLogger.d(Variables.TAG, "TeamDetailViewModel initialized for member ID: $memberId")
+        AppLogger.d(AppConfig.TAG, "TeamDetailViewModel initialized for member ID: $memberId")
 
         loadMemberDetails()
     }
@@ -38,7 +38,7 @@ class TeamDetailViewModel(
         viewModelScope.launch {
             val cachedMember = teamSharedViewModel.state.value.selectedMember
             if (cachedMember != null && cachedMember.email == memberId) {
-                AppLogger.d(Variables.TAG, "Using cached member data from shared ViewModel: ${cachedMember.name}")
+                AppLogger.d(AppConfig.TAG, "Using cached member data from shared ViewModel: ${cachedMember.name}")
                 _state.update {
                     it.copy(
                         member = cachedMember,
@@ -47,12 +47,12 @@ class TeamDetailViewModel(
                 }
             }
 
-            AppLogger.d(Variables.TAG, "Fetching fresh member data for ID: $memberId")
+            AppLogger.d(AppConfig.TAG, "Fetching fresh member data for ID: $memberId")
             _state.update { it.copy(isLoading = true) }
 
             when (val result = ecellRepository.loadAccount(memberId)) {
                 is Result.Success -> {
-                    AppLogger.d(Variables.TAG, "Successfully loaded member: ${result.data.name}")
+                    AppLogger.d(AppConfig.TAG, "Successfully loaded member: ${result.data.name}")
                     _state.update {
                         it.copy(
                             member = result.data,
@@ -63,7 +63,7 @@ class TeamDetailViewModel(
                 }
 
                 is Result.Error -> {
-                    AppLogger.e(Variables.TAG, "Failed to load member details: ${result.error}")
+                    AppLogger.e(AppConfig.TAG, "Failed to load member details: ${result.error}")
                     _state.update {
                         it.copy(
                             isLoading = false,

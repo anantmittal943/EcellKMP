@@ -3,9 +3,9 @@ package com.anantmittal.ecellkmp.presentation.signup_screen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anantmittal.ecellkmp.domain.repository.EcellRepository
+import com.anantmittal.ecellkmp.utility.domain.AppConfig
 import com.anantmittal.ecellkmp.utility.domain.AppLogger
 import com.anantmittal.ecellkmp.utility.domain.Result
-import com.anantmittal.ecellkmp.utility.domain.Variables
 import com.anantmittal.ecellkmp.utility.presentation.UiText
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -124,12 +124,12 @@ class SignupViewModel(
                 validateForm(currentState)
                 if (_state.value.isSignupButtonEnabled) {
                     viewModelScope.launch {
-                        AppLogger.d(Variables.TAG, "SignupVM: Starting signup process")
+                        AppLogger.d(AppConfig.TAG, "SignupVM: Starting signup process")
                         _state.update { it.copy(isLoading = true, errorMessage = null) }
 
                         when (val result = ecellRepository.signup(action.signupModel)) {
                             is Result.Success -> {
-                                AppLogger.d(Variables.TAG, "SignupVM: Signup successful for ${result.data.name}")
+                                AppLogger.d(AppConfig.TAG, "SignupVM: Signup successful for ${result.data.name}")
                                 _state.update {
                                     it.copy(
                                         isLoading = false,
@@ -140,7 +140,7 @@ class SignupViewModel(
                             }
 
                             is Result.Error -> {
-                                AppLogger.e(Variables.TAG, "SignupVM: Signup failed: ${result.error}")
+                                AppLogger.e(AppConfig.TAG, "SignupVM: Signup failed: ${result.error}")
                                 _state.update {
                                     it.copy(
                                         isLoading = false,

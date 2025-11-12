@@ -11,9 +11,5 @@ interface EcellAuthSource {
     val currentUser: Flow<User?>
     suspend fun login(loginModel: LoginModel): EmptyResult<DataError.Remote>
     suspend fun signup(signupModel: SignupModel): EmptyResult<DataError.Remote>
-
-    //    suspend fun createAccountDb(accountDTO: AccountDTO): EmptyResult<DataError.Remote>
-//    suspend fun getAccountDb(email: String): Result<AccountDTO, DataError.Remote>
-//    suspend fun getTeamMembers(): Result<List<AccountDTO>, DataError.Remote>
     suspend fun signOut()
 }

@@ -3,9 +3,9 @@ package com.anantmittal.ecellkmp.presentation.login_screen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anantmittal.ecellkmp.domain.repository.EcellRepository
+import com.anantmittal.ecellkmp.utility.domain.AppConfig
 import com.anantmittal.ecellkmp.utility.domain.AppLogger
 import com.anantmittal.ecellkmp.utility.domain.Result
-import com.anantmittal.ecellkmp.utility.domain.Variables
 import com.anantmittal.ecellkmp.utility.presentation.UiText
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -91,12 +91,12 @@ class LoginViewModel(
                 validateForm(currentState)
                 if (_state.value.isLoginButtonEnabled) {
                     viewModelScope.launch {
-                        AppLogger.d(Variables.TAG, "LoginVM: Starting login process")
+                        AppLogger.d(AppConfig.TAG, "LoginVM: Starting login process")
                         _state.update { it.copy(isLoading = true, errorMessage = null) }
 
                         when (val result = ecellRepository.login(action.loginModel)) {
                             is Result.Success -> {
-                                AppLogger.d(Variables.TAG, "LoginVM: Login successful for ${result.data.name}")
+                                AppLogger.d(AppConfig.TAG, "LoginVM: Login successful for ${result.data.name}")
                                 _state.update {
                                     it.copy(
                                         isLoading = false,
@@ -107,7 +107,7 @@ class LoginViewModel(
                             }
 
                             is Result.Error -> {
-                                AppLogger.e(Variables.TAG, "LoginVM: Login failed: ${result.error}")
+                                AppLogger.e(AppConfig.TAG, "LoginVM: Login failed: ${result.error}")
                                 _state.update {
                                     it.copy(
                                         isLoading = false,
